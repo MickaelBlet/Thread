@@ -1,18 +1,18 @@
 #include <iostream>
 
-#include "mblet/threadator.h"
+#include "blet/thread.h"
 
-void threadExampleWithRefArg(double& d) {
+void functionExampleWithRefArg(double& d) {
     d += 1.0;
-    std::cout << "Inside threadExampleWithRefArg(" << d << ")" << std::endl;
+    std::cout << "Inside functionExampleWithRefArg(" << d << ")" << std::endl;
 }
 
-void threadExampleWithArg(double d) {
-    std::cout << "Inside threadExampleWithArg(" << d << ")" << std::endl;
+void functionExampleWithArg(double d) {
+    std::cout << "Inside functionExampleWithArg(" << d << ")" << std::endl;
 }
 
-void threadExample(void) {
-    std::cout << "Inside threadExample" << std::endl;
+void functionExample(void) {
+    std::cout << "Inside functionExample" << std::endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -20,14 +20,14 @@ int main(int argc, char* argv[]) {
     (void)argv;
 
     std::cout << "=== Start ===" << std::endl;
-    mblet::Threadator thrd;
-    thrd.start(&threadExample);
+    blet::Thread thrd;
+    thrd.start(&functionExample);
     thrd.join();
-    thrd.start(&threadExampleWithArg, 42.42);
+    thrd.start(&functionExampleWithArg, 42.42);
     thrd.join();
     double d = 42.42;
     // type of first argument (double&)
-    thrd.start<double&>(&threadExampleWithRefArg, d);
+    thrd.start<double&>(&functionExampleWithRefArg, d);
     thrd.join();
     std::cout << "New value of d: " << d << std::endl;
     std::cout << "===  End  ===" << std::endl;

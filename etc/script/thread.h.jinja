@@ -1,5 +1,5 @@
 /**
- * threadator.h
+ * thread.h
  *
  * Licensed under the MIT License <http://opensource.org/licenses/MIT>.
  * Copyright (c) 2023 BLET Mickaël.
@@ -23,16 +23,15 @@
  * SOFTWARE.
  */
 
-#ifndef _MBLET_THREADATOR_H_
-#define _MBLET_THREADATOR_H_
+#ifndef _BLET_THREAD_H_
+#define _BLET_THREAD_H_
 
 #include <pthread.h>
-
 #include <exception>
 
-namespace mblet {
+namespace blet {
 
-class Threadator {
+class Thread {
   private:
     pthread_t _id;
     bool _isDetached;
@@ -45,10 +44,8 @@ class Threadator {
             std::exception(),
             _what(message),
             _id(id) {
-            {}
         }
         virtual ~Exception() throw() {
-            {}
         }
         const char* what() const throw() {
             return _what;
@@ -59,14 +56,13 @@ class Threadator {
         pthread_t _id;
     };
 
-    Threadator() :
+    Thread() :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
-        {}
     }
 
-    virtual ~Threadator() throw() {
+    virtual ~Thread() throw() {
         if (_id != 0 && !_isDetached) {
             throw Exception(_id, "Thread is not joining");
         }
@@ -130,7 +126,7 @@ class Threadator {
 {% if i > 1 or type == 'Method' or type == 'MethodConst' %}
     template<{% if type == 'Method' or type == 'MethodConst' %}typename Class{% if i > 1 %}, {% endif %}{% endif %}{% for i in range(1, i) %}{% if i > 1 %}, {% endif %}typename A{{i}}{% endfor %}>
 {% endif %}
-    Threadator(void ({% if type == 'Method' or type == 'MethodConst' %}Class::{% endif %}*pFunction)({% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}}{% endfor %}){% if type == 'MethodConst' %} const{% endif %}{% if i > 1 or type == 'Method' or type == 'MethodConst' %}, {% endif %}{% if type == 'Method' or type == 'MethodConst' %}Class* pObject{% if i > 1 %}, {% endif %}{% endif %}{% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}} a{{i}}{% endfor %}) :
+    Thread(void ({% if type == 'Method' or type == 'MethodConst' %}Class::{% endif %}*pFunction)({% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}}{% endfor %}){% if type == 'MethodConst' %} const{% endif %}{% if i > 1 or type == 'Method' or type == 'MethodConst' %}, {% endif %}{% if type == 'Method' or type == 'MethodConst' %}Class* pObject{% if i > 1 %}, {% endif %}{% endif %}{% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}} a{{i}}{% endfor %}) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -204,6 +200,6 @@ class Threadator {
 {% endfor %}
 };
 
-} // namespace mblet
+} // namespace blet
 
-#endif // #ifndef _MBLET_THREADATOR_H_
+#endif // #ifndef _BLET_THREAD_H_

@@ -1,5 +1,5 @@
 /**
- * threadator.h
+ * thread.h
  *
  * Licensed under the MIT License <http://opensource.org/licenses/MIT>.
  * Copyright (c) 2023 BLET Mickaël.
@@ -23,16 +23,16 @@
  * SOFTWARE.
  */
 
-#ifndef _MBLET_THREADATOR_H_
-#define _MBLET_THREADATOR_H_
+#ifndef _BLET_THREAD_H_
+#define _BLET_THREAD_H_
 
 #include <pthread.h>
 
 #include <exception>
 
-namespace mblet {
+namespace blet {
 
-class Threadator {
+class Thread {
   private:
     pthread_t _id;
     bool _isDetached;
@@ -44,12 +44,8 @@ class Threadator {
         Exception(const pthread_t& id, const char* message) :
             std::exception(),
             _what(message),
-            _id(id) {
-            {}
-        }
-        virtual ~Exception() throw() {
-            {}
-        }
+            _id(id) {}
+        virtual ~Exception() throw() {}
         const char* what() const throw() {
             return _what;
         }
@@ -59,14 +55,12 @@ class Threadator {
         pthread_t _id;
     };
 
-    Threadator() :
+    Thread() :
         _id(0),
         _isDetached(false),
-        _attr(NULL) {
-        {}
-    }
+        _attr(NULL) {}
 
-    virtual ~Threadator() throw() {
+    virtual ~Thread() throw() {
         if (_id != 0 && !_isDetached) {
             throw Exception(_id, "Thread is not joining");
         }
@@ -124,7 +118,7 @@ class Threadator {
     // -------------------------------------------------------------------------
 
   public:
-    Threadator(void (*pFunction)()) :
+    Thread(void (*pFunction)()) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -136,7 +130,8 @@ class Threadator {
             throw Exception(_id, "Thread already started");
         }
         ThreadDataStatic0* pThreadData = new ThreadDataStatic0(pFunction);
-        int result = pthread_create(&_id, _attr, &startThreadStatic0, pThreadData);
+        int result =
+            pthread_create(&_id, _attr, &startThreadStatic0, pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -154,7 +149,8 @@ class Threadator {
     };
 
     static void* startThreadStatic0(void* data) {
-        ThreadDataStatic0* pThreadData = reinterpret_cast<ThreadDataStatic0*>(data);
+        ThreadDataStatic0* pThreadData =
+            reinterpret_cast<ThreadDataStatic0*>(data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
@@ -162,7 +158,7 @@ class Threadator {
 
   public:
     template<typename A1>
-    Threadator(void (*pFunction)(A1), A1 a1) :
+    Thread(void (*pFunction)(A1), A1 a1) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -174,8 +170,10 @@ class Threadator {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
-        ThreadDataStatic1<A1>* pThreadData = new ThreadDataStatic1<A1>(pFunction, a1);
-        int result = pthread_create(&_id, _attr, &startThreadStatic1<A1>, pThreadData);
+        ThreadDataStatic1<A1>* pThreadData =
+            new ThreadDataStatic1<A1>(pFunction, a1);
+        int result =
+            pthread_create(&_id, _attr, &startThreadStatic1<A1>, pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -197,7 +195,8 @@ class Threadator {
 
     template<typename A1>
     static void* startThreadStatic1(void* data) {
-        ThreadDataStatic1<A1>* pThreadData = reinterpret_cast<ThreadDataStatic1<A1>*>(data);
+        ThreadDataStatic1<A1>* pThreadData =
+            reinterpret_cast<ThreadDataStatic1<A1>*>(data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
@@ -205,7 +204,7 @@ class Threadator {
 
   public:
     template<typename A1, typename A2>
-    Threadator(void (*pFunction)(A1, A2), A1 a1, A2 a2) :
+    Thread(void (*pFunction)(A1, A2), A1 a1, A2 a2) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -217,8 +216,10 @@ class Threadator {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
-        ThreadDataStatic2<A1, A2>* pThreadData = new ThreadDataStatic2<A1, A2>(pFunction, a1, a2);
-        int result = pthread_create(&_id, _attr, &startThreadStatic2<A1, A2>, pThreadData);
+        ThreadDataStatic2<A1, A2>* pThreadData =
+            new ThreadDataStatic2<A1, A2>(pFunction, a1, a2);
+        int result = pthread_create(&_id, _attr, &startThreadStatic2<A1, A2>,
+                                    pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -242,7 +243,8 @@ class Threadator {
 
     template<typename A1, typename A2>
     static void* startThreadStatic2(void* data) {
-        ThreadDataStatic2<A1, A2>* pThreadData = reinterpret_cast<ThreadDataStatic2<A1, A2>*>(data);
+        ThreadDataStatic2<A1, A2>* pThreadData =
+            reinterpret_cast<ThreadDataStatic2<A1, A2>*>(data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
@@ -250,7 +252,7 @@ class Threadator {
 
   public:
     template<typename A1, typename A2, typename A3>
-    Threadator(void (*pFunction)(A1, A2, A3), A1 a1, A2 a2, A3 a3) :
+    Thread(void (*pFunction)(A1, A2, A3), A1 a1, A2 a2, A3 a3) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -262,8 +264,10 @@ class Threadator {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
-        ThreadDataStatic3<A1, A2, A3>* pThreadData = new ThreadDataStatic3<A1, A2, A3>(pFunction, a1, a2, a3);
-        int result = pthread_create(&_id, _attr, &startThreadStatic3<A1, A2, A3>, pThreadData);
+        ThreadDataStatic3<A1, A2, A3>* pThreadData =
+            new ThreadDataStatic3<A1, A2, A3>(pFunction, a1, a2, a3);
+        int result = pthread_create(
+            &_id, _attr, &startThreadStatic3<A1, A2, A3>, pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -289,7 +293,8 @@ class Threadator {
 
     template<typename A1, typename A2, typename A3>
     static void* startThreadStatic3(void* data) {
-        ThreadDataStatic3<A1, A2, A3>* pThreadData = reinterpret_cast<ThreadDataStatic3<A1, A2, A3>*>(data);
+        ThreadDataStatic3<A1, A2, A3>* pThreadData =
+            reinterpret_cast<ThreadDataStatic3<A1, A2, A3>*>(data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
@@ -297,7 +302,7 @@ class Threadator {
 
   public:
     template<typename A1, typename A2, typename A3, typename A4>
-    Threadator(void (*pFunction)(A1, A2, A3, A4), A1 a1, A2 a2, A3 a3, A4 a4) :
+    Thread(void (*pFunction)(A1, A2, A3, A4), A1 a1, A2 a2, A3 a3, A4 a4) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -311,7 +316,8 @@ class Threadator {
         }
         ThreadDataStatic4<A1, A2, A3, A4>* pThreadData =
             new ThreadDataStatic4<A1, A2, A3, A4>(pFunction, a1, a2, a3, a4);
-        int result = pthread_create(&_id, _attr, &startThreadStatic4<A1, A2, A3, A4>, pThreadData);
+        int result = pthread_create(
+            &_id, _attr, &startThreadStatic4<A1, A2, A3, A4>, pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -321,7 +327,8 @@ class Threadator {
   private:
     template<typename A1, typename A2, typename A3, typename A4>
     struct ThreadDataStatic4 {
-        ThreadDataStatic4(void (*pFunction)(A1, A2, A3, A4), A1 a1, A2 a2, A3 a3, A4 a4) :
+        ThreadDataStatic4(void (*pFunction)(A1, A2, A3, A4), A1 a1, A2 a2,
+                          A3 a3, A4 a4) :
             _pFunction(pFunction),
             _a1(a1),
             _a2(a2),
@@ -339,7 +346,8 @@ class Threadator {
 
     template<typename A1, typename A2, typename A3, typename A4>
     static void* startThreadStatic4(void* data) {
-        ThreadDataStatic4<A1, A2, A3, A4>* pThreadData = reinterpret_cast<ThreadDataStatic4<A1, A2, A3, A4>*>(data);
+        ThreadDataStatic4<A1, A2, A3, A4>* pThreadData =
+            reinterpret_cast<ThreadDataStatic4<A1, A2, A3, A4>*>(data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
@@ -347,7 +355,8 @@ class Threadator {
 
   public:
     template<typename A1, typename A2, typename A3, typename A4, typename A5>
-    Threadator(void (*pFunction)(A1, A2, A3, A4, A5), A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) :
+    Thread(void (*pFunction)(A1, A2, A3, A4, A5), A1 a1, A2 a2, A3 a3, A4 a4,
+           A5 a5) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -355,13 +364,16 @@ class Threadator {
     }
 
     template<typename A1, typename A2, typename A3, typename A4, typename A5>
-    void start(void (*pFunction)(A1, A2, A3, A4, A5), A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+    void start(void (*pFunction)(A1, A2, A3, A4, A5), A1 a1, A2 a2, A3 a3,
+               A4 a4, A5 a5) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
         ThreadDataStatic5<A1, A2, A3, A4, A5>* pThreadData =
-            new ThreadDataStatic5<A1, A2, A3, A4, A5>(pFunction, a1, a2, a3, a4, a5);
-        int result = pthread_create(&_id, _attr, &startThreadStatic5<A1, A2, A3, A4, A5>, pThreadData);
+            new ThreadDataStatic5<A1, A2, A3, A4, A5>(pFunction, a1, a2, a3, a4,
+                                                      a5);
+        int result = pthread_create(
+            &_id, _attr, &startThreadStatic5<A1, A2, A3, A4, A5>, pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -371,7 +383,8 @@ class Threadator {
   private:
     template<typename A1, typename A2, typename A3, typename A4, typename A5>
     struct ThreadDataStatic5 {
-        ThreadDataStatic5(void (*pFunction)(A1, A2, A3, A4, A5), A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) :
+        ThreadDataStatic5(void (*pFunction)(A1, A2, A3, A4, A5), A1 a1, A2 a2,
+                          A3 a3, A4 a4, A5 a5) :
             _pFunction(pFunction),
             _a1(a1),
             _a2(a2),
@@ -399,22 +412,29 @@ class Threadator {
     }
 
   public:
-    template<typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
-    Threadator(void (*pFunction)(A1, A2, A3, A4, A5, A6), A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) :
+    template<typename A1, typename A2, typename A3, typename A4, typename A5,
+             typename A6>
+    Thread(void (*pFunction)(A1, A2, A3, A4, A5, A6), A1 a1, A2 a2, A3 a3,
+           A4 a4, A5 a5, A6 a6) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
         start(pFunction, a1, a2, a3, a4, a5, a6);
     }
 
-    template<typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
-    void start(void (*pFunction)(A1, A2, A3, A4, A5, A6), A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
+    template<typename A1, typename A2, typename A3, typename A4, typename A5,
+             typename A6>
+    void start(void (*pFunction)(A1, A2, A3, A4, A5, A6), A1 a1, A2 a2, A3 a3,
+               A4 a4, A5 a5, A6 a6) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
         ThreadDataStatic6<A1, A2, A3, A4, A5, A6>* pThreadData =
-            new ThreadDataStatic6<A1, A2, A3, A4, A5, A6>(pFunction, a1, a2, a3, a4, a5, a6);
-        int result = pthread_create(&_id, _attr, &startThreadStatic6<A1, A2, A3, A4, A5, A6>, pThreadData);
+            new ThreadDataStatic6<A1, A2, A3, A4, A5, A6>(pFunction, a1, a2, a3,
+                                                          a4, a5, a6);
+        int result = pthread_create(&_id, _attr,
+                                    &startThreadStatic6<A1, A2, A3, A4, A5, A6>,
+                                    pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -422,9 +442,11 @@ class Threadator {
     }
 
   private:
-    template<typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
+    template<typename A1, typename A2, typename A3, typename A4, typename A5,
+             typename A6>
     struct ThreadDataStatic6 {
-        ThreadDataStatic6(void (*pFunction)(A1, A2, A3, A4, A5, A6), A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) :
+        ThreadDataStatic6(void (*pFunction)(A1, A2, A3, A4, A5, A6), A1 a1,
+                          A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) :
             _pFunction(pFunction),
             _a1(a1),
             _a2(a2),
@@ -444,7 +466,8 @@ class Threadator {
         A6 _a6;
     };
 
-    template<typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
+    template<typename A1, typename A2, typename A3, typename A4, typename A5,
+             typename A6>
     static void* startThreadStatic6(void* data) {
         ThreadDataStatic6<A1, A2, A3, A4, A5, A6>* pThreadData =
             reinterpret_cast<ThreadDataStatic6<A1, A2, A3, A4, A5, A6>*>(data);
@@ -454,22 +477,29 @@ class Threadator {
     }
 
   public:
-    template<typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7>
-    Threadator(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7), A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) :
+    template<typename A1, typename A2, typename A3, typename A4, typename A5,
+             typename A6, typename A7>
+    Thread(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7), A1 a1, A2 a2, A3 a3,
+           A4 a4, A5 a5, A6 a6, A7 a7) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
         start(pFunction, a1, a2, a3, a4, a5, a6, a7);
     }
 
-    template<typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7>
-    void start(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7), A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
+    template<typename A1, typename A2, typename A3, typename A4, typename A5,
+             typename A6, typename A7>
+    void start(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7), A1 a1, A2 a2,
+               A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
         ThreadDataStatic7<A1, A2, A3, A4, A5, A6, A7>* pThreadData =
-            new ThreadDataStatic7<A1, A2, A3, A4, A5, A6, A7>(pFunction, a1, a2, a3, a4, a5, a6, a7);
-        int result = pthread_create(&_id, _attr, &startThreadStatic7<A1, A2, A3, A4, A5, A6, A7>, pThreadData);
+            new ThreadDataStatic7<A1, A2, A3, A4, A5, A6, A7>(
+                pFunction, a1, a2, a3, a4, a5, a6, a7);
+        int result = pthread_create(
+            &_id, _attr, &startThreadStatic7<A1, A2, A3, A4, A5, A6, A7>,
+            pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -477,10 +507,11 @@ class Threadator {
     }
 
   private:
-    template<typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7>
+    template<typename A1, typename A2, typename A3, typename A4, typename A5,
+             typename A6, typename A7>
     struct ThreadDataStatic7 {
-        ThreadDataStatic7(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7), A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
-                          A7 a7) :
+        ThreadDataStatic7(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7), A1 a1,
+                          A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) :
             _pFunction(pFunction),
             _a1(a1),
             _a2(a2),
@@ -502,34 +533,41 @@ class Threadator {
         A7 _a7;
     };
 
-    template<typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7>
+    template<typename A1, typename A2, typename A3, typename A4, typename A5,
+             typename A6, typename A7>
     static void* startThreadStatic7(void* data) {
         ThreadDataStatic7<A1, A2, A3, A4, A5, A6, A7>* pThreadData =
-            reinterpret_cast<ThreadDataStatic7<A1, A2, A3, A4, A5, A6, A7>*>(data);
+            reinterpret_cast<ThreadDataStatic7<A1, A2, A3, A4, A5, A6, A7>*>(
+                data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
     }
 
   public:
-    template<typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8>
-    Threadator(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8), A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
-               A8 a8) :
+    template<typename A1, typename A2, typename A3, typename A4, typename A5,
+             typename A6, typename A7, typename A8>
+    Thread(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8), A1 a1, A2 a2,
+           A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
         start(pFunction, a1, a2, a3, a4, a5, a6, a7, a8);
     }
 
-    template<typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8>
-    void start(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8), A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
-               A8 a8) {
+    template<typename A1, typename A2, typename A3, typename A4, typename A5,
+             typename A6, typename A7, typename A8>
+    void start(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8), A1 a1, A2 a2,
+               A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
         ThreadDataStatic8<A1, A2, A3, A4, A5, A6, A7, A8>* pThreadData =
-            new ThreadDataStatic8<A1, A2, A3, A4, A5, A6, A7, A8>(pFunction, a1, a2, a3, a4, a5, a6, a7, a8);
-        int result = pthread_create(&_id, _attr, &startThreadStatic8<A1, A2, A3, A4, A5, A6, A7, A8>, pThreadData);
+            new ThreadDataStatic8<A1, A2, A3, A4, A5, A6, A7, A8>(
+                pFunction, a1, a2, a3, a4, a5, a6, a7, a8);
+        int result = pthread_create(
+            &_id, _attr, &startThreadStatic8<A1, A2, A3, A4, A5, A6, A7, A8>,
+            pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -537,10 +575,12 @@ class Threadator {
     }
 
   private:
-    template<typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8>
+    template<typename A1, typename A2, typename A3, typename A4, typename A5,
+             typename A6, typename A7, typename A8>
     struct ThreadDataStatic8 {
-        ThreadDataStatic8(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8), A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
-                          A7 a7, A8 a8) :
+        ThreadDataStatic8(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8),
+                          A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
+                          A8 a8) :
             _pFunction(pFunction),
             _a1(a1),
             _a2(a2),
@@ -564,36 +604,42 @@ class Threadator {
         A8 _a8;
     };
 
-    template<typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8>
+    template<typename A1, typename A2, typename A3, typename A4, typename A5,
+             typename A6, typename A7, typename A8>
     static void* startThreadStatic8(void* data) {
         ThreadDataStatic8<A1, A2, A3, A4, A5, A6, A7, A8>* pThreadData =
-            reinterpret_cast<ThreadDataStatic8<A1, A2, A3, A4, A5, A6, A7, A8>*>(data);
+            reinterpret_cast<
+                ThreadDataStatic8<A1, A2, A3, A4, A5, A6, A7, A8>*>(data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
     }
 
   public:
-    template<typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8,
-             typename A9>
-    Threadator(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9), A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
-               A8 a8, A9 a9) :
+    template<typename A1, typename A2, typename A3, typename A4, typename A5,
+             typename A6, typename A7, typename A8, typename A9>
+    Thread(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9), A1 a1, A2 a2,
+           A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
         start(pFunction, a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
 
-    template<typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8,
-             typename A9>
-    void start(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9), A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
-               A8 a8, A9 a9) {
+    template<typename A1, typename A2, typename A3, typename A4, typename A5,
+             typename A6, typename A7, typename A8, typename A9>
+    void start(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9), A1 a1,
+               A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
         ThreadDataStatic9<A1, A2, A3, A4, A5, A6, A7, A8, A9>* pThreadData =
-            new ThreadDataStatic9<A1, A2, A3, A4, A5, A6, A7, A8, A9>(pFunction, a1, a2, a3, a4, a5, a6, a7, a8, a9);
-        int result = pthread_create(&_id, _attr, &startThreadStatic9<A1, A2, A3, A4, A5, A6, A7, A8, A9>, pThreadData);
+            new ThreadDataStatic9<A1, A2, A3, A4, A5, A6, A7, A8, A9>(
+                pFunction, a1, a2, a3, a4, a5, a6, a7, a8, a9);
+        int result = pthread_create(
+            &_id, _attr,
+            &startThreadStatic9<A1, A2, A3, A4, A5, A6, A7, A8, A9>,
+            pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -601,11 +647,12 @@ class Threadator {
     }
 
   private:
-    template<typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8,
-             typename A9>
+    template<typename A1, typename A2, typename A3, typename A4, typename A5,
+             typename A6, typename A7, typename A8, typename A9>
     struct ThreadDataStatic9 {
-        ThreadDataStatic9(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9), A1 a1, A2 a2, A3 a3, A4 a4, A5 a5,
-                          A6 a6, A7 a7, A8 a8, A9 a9) :
+        ThreadDataStatic9(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9),
+                          A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
+                          A8 a8, A9 a9) :
             _pFunction(pFunction),
             _a1(a1),
             _a2(a2),
@@ -631,39 +678,44 @@ class Threadator {
         A9 _a9;
     };
 
-    template<typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8,
-             typename A9>
+    template<typename A1, typename A2, typename A3, typename A4, typename A5,
+             typename A6, typename A7, typename A8, typename A9>
     static void* startThreadStatic9(void* data) {
         ThreadDataStatic9<A1, A2, A3, A4, A5, A6, A7, A8, A9>* pThreadData =
-            reinterpret_cast<ThreadDataStatic9<A1, A2, A3, A4, A5, A6, A7, A8, A9>*>(data);
+            reinterpret_cast<
+                ThreadDataStatic9<A1, A2, A3, A4, A5, A6, A7, A8, A9>*>(data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
     }
 
   public:
-    template<typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8,
-             typename A9, typename A10>
-    Threadator(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10), A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
-               A7 a7, A8 a8, A9 a9, A10 a10) :
+    template<typename A1, typename A2, typename A3, typename A4, typename A5,
+             typename A6, typename A7, typename A8, typename A9, typename A10>
+    Thread(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10), A1 a1,
+           A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
         start(pFunction, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
     }
 
-    template<typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8,
-             typename A9, typename A10>
-    void start(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10), A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
-               A7 a7, A8 a8, A9 a9, A10 a10) {
+    template<typename A1, typename A2, typename A3, typename A4, typename A5,
+             typename A6, typename A7, typename A8, typename A9, typename A10>
+    void start(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10),
+               A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9,
+               A10 a10) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
-        ThreadDataStatic10<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>* pThreadData =
-            new ThreadDataStatic10<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>(pFunction, a1, a2, a3, a4, a5, a6, a7, a8,
-                                                                            a9, a10);
-        int result =
-            pthread_create(&_id, _attr, &startThreadStatic10<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>, pThreadData);
+        ThreadDataStatic10<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>*
+            pThreadData =
+                new ThreadDataStatic10<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>(
+                    pFunction, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+        int result = pthread_create(
+            &_id, _attr,
+            &startThreadStatic10<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>,
+            pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -671,11 +723,13 @@ class Threadator {
     }
 
   private:
-    template<typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8,
-             typename A9, typename A10>
+    template<typename A1, typename A2, typename A3, typename A4, typename A5,
+             typename A6, typename A7, typename A8, typename A9, typename A10>
     struct ThreadDataStatic10 {
-        ThreadDataStatic10(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10), A1 a1, A2 a2, A3 a3, A4 a4,
-                           A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) :
+        ThreadDataStatic10(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9,
+                                             A10),
+                           A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
+                           A8 a8, A9 a9, A10 a10) :
             _pFunction(pFunction),
             _a1(a1),
             _a2(a2),
@@ -703,11 +757,13 @@ class Threadator {
         A10 _a10;
     };
 
-    template<typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8,
-             typename A9, typename A10>
+    template<typename A1, typename A2, typename A3, typename A4, typename A5,
+             typename A6, typename A7, typename A8, typename A9, typename A10>
     static void* startThreadStatic10(void* data) {
-        ThreadDataStatic10<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>* pThreadData =
-            reinterpret_cast<ThreadDataStatic10<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>*>(data);
+        ThreadDataStatic10<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>*
+            pThreadData = reinterpret_cast<
+                ThreadDataStatic10<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>*>(
+                data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
@@ -715,7 +771,7 @@ class Threadator {
 
   public:
     template<typename Class>
-    Threadator(void (Class::*pFunction)(), Class* pObject) :
+    Thread(void (Class::*pFunction)(), Class* pObject) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -727,8 +783,10 @@ class Threadator {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
-        ThreadDataMethod0<Class>* pThreadData = new ThreadDataMethod0<Class>(pFunction, pObject);
-        int result = pthread_create(&_id, _attr, &startThreadMethod0<Class>, pThreadData);
+        ThreadDataMethod0<Class>* pThreadData =
+            new ThreadDataMethod0<Class>(pFunction, pObject);
+        int result = pthread_create(&_id, _attr, &startThreadMethod0<Class>,
+                                    pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -750,7 +808,8 @@ class Threadator {
 
     template<typename Class>
     static void* startThreadMethod0(void* data) {
-        ThreadDataMethod0<Class>* pThreadData = reinterpret_cast<ThreadDataMethod0<Class>*>(data);
+        ThreadDataMethod0<Class>* pThreadData =
+            reinterpret_cast<ThreadDataMethod0<Class>*>(data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
@@ -758,7 +817,7 @@ class Threadator {
 
   public:
     template<typename Class, typename A1>
-    Threadator(void (Class::*pFunction)(A1), Class* pObject, A1 a1) :
+    Thread(void (Class::*pFunction)(A1), Class* pObject, A1 a1) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -770,8 +829,10 @@ class Threadator {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
-        ThreadDataMethod1<Class, A1>* pThreadData = new ThreadDataMethod1<Class, A1>(pFunction, pObject, a1);
-        int result = pthread_create(&_id, _attr, &startThreadMethod1<Class, A1>, pThreadData);
+        ThreadDataMethod1<Class, A1>* pThreadData =
+            new ThreadDataMethod1<Class, A1>(pFunction, pObject, a1);
+        int result = pthread_create(&_id, _attr, &startThreadMethod1<Class, A1>,
+                                    pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -795,7 +856,8 @@ class Threadator {
 
     template<typename Class, typename A1>
     static void* startThreadMethod1(void* data) {
-        ThreadDataMethod1<Class, A1>* pThreadData = reinterpret_cast<ThreadDataMethod1<Class, A1>*>(data);
+        ThreadDataMethod1<Class, A1>* pThreadData =
+            reinterpret_cast<ThreadDataMethod1<Class, A1>*>(data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
@@ -803,7 +865,7 @@ class Threadator {
 
   public:
     template<typename Class, typename A1, typename A2>
-    Threadator(void (Class::*pFunction)(A1, A2), Class* pObject, A1 a1, A2 a2) :
+    Thread(void (Class::*pFunction)(A1, A2), Class* pObject, A1 a1, A2 a2) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -817,7 +879,8 @@ class Threadator {
         }
         ThreadDataMethod2<Class, A1, A2>* pThreadData =
             new ThreadDataMethod2<Class, A1, A2>(pFunction, pObject, a1, a2);
-        int result = pthread_create(&_id, _attr, &startThreadMethod2<Class, A1, A2>, pThreadData);
+        int result = pthread_create(
+            &_id, _attr, &startThreadMethod2<Class, A1, A2>, pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -827,7 +890,8 @@ class Threadator {
   private:
     template<typename Class, typename A1, typename A2>
     struct ThreadDataMethod2 {
-        ThreadDataMethod2(void (Class::*pFunction)(A1, A2), Class* pObject, A1 a1, A2 a2) :
+        ThreadDataMethod2(void (Class::*pFunction)(A1, A2), Class* pObject,
+                          A1 a1, A2 a2) :
             _pFunction(pFunction),
             _pObject(pObject),
             _a1(a1),
@@ -843,7 +907,8 @@ class Threadator {
 
     template<typename Class, typename A1, typename A2>
     static void* startThreadMethod2(void* data) {
-        ThreadDataMethod2<Class, A1, A2>* pThreadData = reinterpret_cast<ThreadDataMethod2<Class, A1, A2>*>(data);
+        ThreadDataMethod2<Class, A1, A2>* pThreadData =
+            reinterpret_cast<ThreadDataMethod2<Class, A1, A2>*>(data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
@@ -851,7 +916,8 @@ class Threadator {
 
   public:
     template<typename Class, typename A1, typename A2, typename A3>
-    Threadator(void (Class::*pFunction)(A1, A2, A3), Class* pObject, A1 a1, A2 a2, A3 a3) :
+    Thread(void (Class::*pFunction)(A1, A2, A3), Class* pObject, A1 a1, A2 a2,
+           A3 a3) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -859,13 +925,16 @@ class Threadator {
     }
 
     template<typename Class, typename A1, typename A2, typename A3>
-    void start(void (Class::*pFunction)(A1, A2, A3), Class* pObject, A1 a1, A2 a2, A3 a3) {
+    void start(void (Class::*pFunction)(A1, A2, A3), Class* pObject, A1 a1,
+               A2 a2, A3 a3) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
         ThreadDataMethod3<Class, A1, A2, A3>* pThreadData =
-            new ThreadDataMethod3<Class, A1, A2, A3>(pFunction, pObject, a1, a2, a3);
-        int result = pthread_create(&_id, _attr, &startThreadMethod3<Class, A1, A2, A3>, pThreadData);
+            new ThreadDataMethod3<Class, A1, A2, A3>(pFunction, pObject, a1, a2,
+                                                     a3);
+        int result = pthread_create(
+            &_id, _attr, &startThreadMethod3<Class, A1, A2, A3>, pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -875,7 +944,8 @@ class Threadator {
   private:
     template<typename Class, typename A1, typename A2, typename A3>
     struct ThreadDataMethod3 {
-        ThreadDataMethod3(void (Class::*pFunction)(A1, A2, A3), Class* pObject, A1 a1, A2 a2, A3 a3) :
+        ThreadDataMethod3(void (Class::*pFunction)(A1, A2, A3), Class* pObject,
+                          A1 a1, A2 a2, A3 a3) :
             _pFunction(pFunction),
             _pObject(pObject),
             _a1(a1),
@@ -902,7 +972,8 @@ class Threadator {
 
   public:
     template<typename Class, typename A1, typename A2, typename A3, typename A4>
-    Threadator(void (Class::*pFunction)(A1, A2, A3, A4), Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4) :
+    Thread(void (Class::*pFunction)(A1, A2, A3, A4), Class* pObject, A1 a1,
+           A2 a2, A3 a3, A4 a4) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -910,13 +981,17 @@ class Threadator {
     }
 
     template<typename Class, typename A1, typename A2, typename A3, typename A4>
-    void start(void (Class::*pFunction)(A1, A2, A3, A4), Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4) {
+    void start(void (Class::*pFunction)(A1, A2, A3, A4), Class* pObject, A1 a1,
+               A2 a2, A3 a3, A4 a4) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
         ThreadDataMethod4<Class, A1, A2, A3, A4>* pThreadData =
-            new ThreadDataMethod4<Class, A1, A2, A3, A4>(pFunction, pObject, a1, a2, a3, a4);
-        int result = pthread_create(&_id, _attr, &startThreadMethod4<Class, A1, A2, A3, A4>, pThreadData);
+            new ThreadDataMethod4<Class, A1, A2, A3, A4>(pFunction, pObject, a1,
+                                                         a2, a3, a4);
+        int result = pthread_create(&_id, _attr,
+                                    &startThreadMethod4<Class, A1, A2, A3, A4>,
+                                    pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -926,7 +1001,8 @@ class Threadator {
   private:
     template<typename Class, typename A1, typename A2, typename A3, typename A4>
     struct ThreadDataMethod4 {
-        ThreadDataMethod4(void (Class::*pFunction)(A1, A2, A3, A4), Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4) :
+        ThreadDataMethod4(void (Class::*pFunction)(A1, A2, A3, A4),
+                          Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4) :
             _pFunction(pFunction),
             _pObject(pObject),
             _a1(a1),
@@ -954,22 +1030,29 @@ class Threadator {
     }
 
   public:
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5>
-    Threadator(void (Class::*pFunction)(A1, A2, A3, A4, A5), Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) :
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5>
+    Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5), Class* pObject, A1 a1,
+           A2 a2, A3 a3, A4 a4, A5 a5) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4, a5);
     }
 
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5>
-    void start(void (Class::*pFunction)(A1, A2, A3, A4, A5), Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5>
+    void start(void (Class::*pFunction)(A1, A2, A3, A4, A5), Class* pObject,
+               A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
         ThreadDataMethod5<Class, A1, A2, A3, A4, A5>* pThreadData =
-            new ThreadDataMethod5<Class, A1, A2, A3, A4, A5>(pFunction, pObject, a1, a2, a3, a4, a5);
-        int result = pthread_create(&_id, _attr, &startThreadMethod5<Class, A1, A2, A3, A4, A5>, pThreadData);
+            new ThreadDataMethod5<Class, A1, A2, A3, A4, A5>(
+                pFunction, pObject, a1, a2, a3, a4, a5);
+        int result = pthread_create(
+            &_id, _attr, &startThreadMethod5<Class, A1, A2, A3, A4, A5>,
+            pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -977,10 +1060,11 @@ class Threadator {
     }
 
   private:
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5>
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5>
     struct ThreadDataMethod5 {
-        ThreadDataMethod5(void (Class::*pFunction)(A1, A2, A3, A4, A5), Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
-                          A5 a5) :
+        ThreadDataMethod5(void (Class::*pFunction)(A1, A2, A3, A4, A5),
+                          Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) :
             _pFunction(pFunction),
             _pObject(pObject),
             _a1(a1),
@@ -1000,34 +1084,41 @@ class Threadator {
         A5 _a5;
     };
 
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5>
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5>
     static void* startThreadMethod5(void* data) {
         ThreadDataMethod5<Class, A1, A2, A3, A4, A5>* pThreadData =
-            reinterpret_cast<ThreadDataMethod5<Class, A1, A2, A3, A4, A5>*>(data);
+            reinterpret_cast<ThreadDataMethod5<Class, A1, A2, A3, A4, A5>*>(
+                data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
     }
 
   public:
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
-    Threadator(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6), Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5,
-               A6 a6) :
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6>
+    Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6), Class* pObject,
+           A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4, a5, a6);
     }
 
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
-    void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6), Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5,
-               A6 a6) {
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6>
+    void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6), Class* pObject,
+               A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
         ThreadDataMethod6<Class, A1, A2, A3, A4, A5, A6>* pThreadData =
-            new ThreadDataMethod6<Class, A1, A2, A3, A4, A5, A6>(pFunction, pObject, a1, a2, a3, a4, a5, a6);
-        int result = pthread_create(&_id, _attr, &startThreadMethod6<Class, A1, A2, A3, A4, A5, A6>, pThreadData);
+            new ThreadDataMethod6<Class, A1, A2, A3, A4, A5, A6>(
+                pFunction, pObject, a1, a2, a3, a4, a5, a6);
+        int result = pthread_create(
+            &_id, _attr, &startThreadMethod6<Class, A1, A2, A3, A4, A5, A6>,
+            pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -1035,10 +1126,12 @@ class Threadator {
     }
 
   private:
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6>
     struct ThreadDataMethod6 {
-        ThreadDataMethod6(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6), Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
-                          A5 a5, A6 a6) :
+        ThreadDataMethod6(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6),
+                          Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5,
+                          A6 a6) :
             _pFunction(pFunction),
             _pObject(pObject),
             _a1(a1),
@@ -1060,34 +1153,42 @@ class Threadator {
         A6 _a6;
     };
 
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6>
     static void* startThreadMethod6(void* data) {
         ThreadDataMethod6<Class, A1, A2, A3, A4, A5, A6>* pThreadData =
-            reinterpret_cast<ThreadDataMethod6<Class, A1, A2, A3, A4, A5, A6>*>(data);
+            reinterpret_cast<ThreadDataMethod6<Class, A1, A2, A3, A4, A5, A6>*>(
+                data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
     }
 
   public:
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7>
-    Threadator(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7), Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5,
-               A6 a6, A7 a7) :
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7>
+    Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7), Class* pObject,
+           A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4, a5, a6, a7);
     }
 
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7>
-    void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7), Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5,
-               A6 a6, A7 a7) {
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7>
+    void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7),
+               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
+               A7 a7) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
         ThreadDataMethod7<Class, A1, A2, A3, A4, A5, A6, A7>* pThreadData =
-            new ThreadDataMethod7<Class, A1, A2, A3, A4, A5, A6, A7>(pFunction, pObject, a1, a2, a3, a4, a5, a6, a7);
-        int result = pthread_create(&_id, _attr, &startThreadMethod7<Class, A1, A2, A3, A4, A5, A6, A7>, pThreadData);
+            new ThreadDataMethod7<Class, A1, A2, A3, A4, A5, A6, A7>(
+                pFunction, pObject, a1, a2, a3, a4, a5, a6, a7);
+        int result = pthread_create(
+            &_id, _attr, &startThreadMethod7<Class, A1, A2, A3, A4, A5, A6, A7>,
+            pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -1095,10 +1196,12 @@ class Threadator {
     }
 
   private:
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7>
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7>
     struct ThreadDataMethod7 {
-        ThreadDataMethod7(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7), Class* pObject, A1 a1, A2 a2, A3 a3,
-                          A4 a4, A5 a5, A6 a6, A7 a7) :
+        ThreadDataMethod7(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7),
+                          Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5,
+                          A6 a6, A7 a7) :
             _pFunction(pFunction),
             _pObject(pObject),
             _a1(a1),
@@ -1122,38 +1225,44 @@ class Threadator {
         A7 _a7;
     };
 
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7>
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7>
     static void* startThreadMethod7(void* data) {
         ThreadDataMethod7<Class, A1, A2, A3, A4, A5, A6, A7>* pThreadData =
-            reinterpret_cast<ThreadDataMethod7<Class, A1, A2, A3, A4, A5, A6, A7>*>(data);
+            reinterpret_cast<
+                ThreadDataMethod7<Class, A1, A2, A3, A4, A5, A6, A7>*>(data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
     }
 
   public:
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7,
-             typename A8>
-    Threadator(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8), Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
-               A5 a5, A6 a6, A7 a7, A8 a8) :
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7, typename A8>
+    Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8),
+           Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
+           A8 a8) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8);
     }
 
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7,
-             typename A8>
-    void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8), Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
-               A5 a5, A6 a6, A7 a7, A8 a8) {
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7, typename A8>
+    void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8),
+               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
+               A8 a8) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
         ThreadDataMethod8<Class, A1, A2, A3, A4, A5, A6, A7, A8>* pThreadData =
-            new ThreadDataMethod8<Class, A1, A2, A3, A4, A5, A6, A7, A8>(pFunction, pObject, a1, a2, a3, a4, a5, a6, a7,
-                                                                         a8);
-        int result =
-            pthread_create(&_id, _attr, &startThreadMethod8<Class, A1, A2, A3, A4, A5, A6, A7, A8>, pThreadData);
+            new ThreadDataMethod8<Class, A1, A2, A3, A4, A5, A6, A7, A8>(
+                pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8);
+        int result = pthread_create(
+            &_id, _attr,
+            &startThreadMethod8<Class, A1, A2, A3, A4, A5, A6, A7, A8>,
+            pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -1161,11 +1270,13 @@ class Threadator {
     }
 
   private:
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7,
-             typename A8>
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7, typename A8>
     struct ThreadDataMethod8 {
-        ThreadDataMethod8(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8), Class* pObject, A1 a1, A2 a2, A3 a3,
-                          A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) :
+        ThreadDataMethod8(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7,
+                                                   A8),
+                          Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5,
+                          A6 a6, A7 a7, A8 a8) :
             _pFunction(pFunction),
             _pObject(pObject),
             _a1(a1),
@@ -1191,39 +1302,46 @@ class Threadator {
         A8 _a8;
     };
 
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7,
-             typename A8>
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7, typename A8>
     static void* startThreadMethod8(void* data) {
         ThreadDataMethod8<Class, A1, A2, A3, A4, A5, A6, A7, A8>* pThreadData =
-            reinterpret_cast<ThreadDataMethod8<Class, A1, A2, A3, A4, A5, A6, A7, A8>*>(data);
+            reinterpret_cast<
+                ThreadDataMethod8<Class, A1, A2, A3, A4, A5, A6, A7, A8>*>(
+                data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
     }
 
   public:
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7,
-             typename A8, typename A9>
-    Threadator(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9), Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
-               A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) :
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7, typename A8, typename A9>
+    Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9),
+           Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
+           A8 a8, A9 a9) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
 
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7,
-             typename A8, typename A9>
-    void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9), Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
-               A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7, typename A8, typename A9>
+    void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9),
+               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
+               A8 a8, A9 a9) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
-        ThreadDataMethod9<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9>* pThreadData =
-            new ThreadDataMethod9<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9>(pFunction, pObject, a1, a2, a3, a4, a5, a6,
-                                                                             a7, a8, a9);
-        int result =
-            pthread_create(&_id, _attr, &startThreadMethod9<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9>, pThreadData);
+        ThreadDataMethod9<Class, A1, A2, A3, A4, A5, A6, A7, A8,
+                          A9>* pThreadData =
+            new ThreadDataMethod9<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9>(
+                pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8, a9);
+        int result = pthread_create(
+            &_id, _attr,
+            &startThreadMethod9<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9>,
+            pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -1231,11 +1349,13 @@ class Threadator {
     }
 
   private:
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7,
-             typename A8, typename A9>
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7, typename A8, typename A9>
     struct ThreadDataMethod9 {
-        ThreadDataMethod9(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9), Class* pObject, A1 a1, A2 a2,
-                          A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) :
+        ThreadDataMethod9(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7,
+                                                   A8, A9),
+                          Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5,
+                          A6 a6, A7 a7, A8 a8, A9 a9) :
             _pFunction(pFunction),
             _pObject(pObject),
             _a1(a1),
@@ -1248,7 +1368,8 @@ class Threadator {
             _a8(a8),
             _a9(a9) {}
         void call() {
-            (_pObject->*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6, _a7, _a8, _a9);
+            (_pObject->*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6, _a7, _a8,
+                                    _a9);
         }
         void (Class::*_pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9);
         Class* _pObject;
@@ -1263,39 +1384,50 @@ class Threadator {
         A9 _a9;
     };
 
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7,
-             typename A8, typename A9>
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7, typename A8, typename A9>
     static void* startThreadMethod9(void* data) {
-        ThreadDataMethod9<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9>* pThreadData =
-            reinterpret_cast<ThreadDataMethod9<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9>*>(data);
+        ThreadDataMethod9<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9>*
+            pThreadData = reinterpret_cast<
+                ThreadDataMethod9<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9>*>(
+                data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
     }
 
   public:
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7,
-             typename A8, typename A9, typename A10>
-    Threadator(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10), Class* pObject, A1 a1, A2 a2, A3 a3,
-               A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) :
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7, typename A8, typename A9,
+             typename A10>
+    Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10),
+           Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
+           A8 a8, A9 a9, A10 a10) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
     }
 
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7,
-             typename A8, typename A9, typename A10>
-    void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10), Class* pObject, A1 a1, A2 a2, A3 a3,
-               A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7, typename A8, typename A9,
+             typename A10>
+    void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9,
+                                        A10),
+               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
+               A8 a8, A9 a9, A10 a10) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
-        ThreadDataMethod10<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>* pThreadData =
-            new ThreadDataMethod10<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>(pFunction, pObject, a1, a2, a3, a4,
-                                                                                   a5, a6, a7, a8, a9, a10);
-        int result = pthread_create(&_id, _attr, &startThreadMethod10<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>,
-                                    pThreadData);
+        ThreadDataMethod10<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>*
+            pThreadData = new ThreadDataMethod10<Class, A1, A2, A3, A4, A5, A6,
+                                                 A7, A8, A9, A10>(
+                pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+        int result =
+            pthread_create(&_id, _attr,
+                           &startThreadMethod10<Class, A1, A2, A3, A4, A5, A6,
+                                                A7, A8, A9, A10>,
+                           pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -1303,11 +1435,14 @@ class Threadator {
     }
 
   private:
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7,
-             typename A8, typename A9, typename A10>
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7, typename A8, typename A9,
+             typename A10>
     struct ThreadDataMethod10 {
-        ThreadDataMethod10(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10), Class* pObject, A1 a1,
-                           A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) :
+        ThreadDataMethod10(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7,
+                                                    A8, A9, A10),
+                           Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5,
+                           A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) :
             _pFunction(pFunction),
             _pObject(pObject),
             _a1(a1),
@@ -1321,7 +1456,8 @@ class Threadator {
             _a9(a9),
             _a10(a10) {}
         void call() {
-            (_pObject->*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6, _a7, _a8, _a9, _a10);
+            (_pObject->*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6, _a7, _a8, _a9,
+                                    _a10);
         }
         void (Class::*_pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10);
         Class* _pObject;
@@ -1337,11 +1473,14 @@ class Threadator {
         A10 _a10;
     };
 
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7,
-             typename A8, typename A9, typename A10>
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7, typename A8, typename A9,
+             typename A10>
     static void* startThreadMethod10(void* data) {
-        ThreadDataMethod10<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>* pThreadData =
-            reinterpret_cast<ThreadDataMethod10<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>*>(data);
+        ThreadDataMethod10<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9,
+                           A10>* pThreadData =
+            reinterpret_cast<ThreadDataMethod10<Class, A1, A2, A3, A4, A5, A6,
+                                                A7, A8, A9, A10>*>(data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
@@ -1349,7 +1488,7 @@ class Threadator {
 
   public:
     template<typename Class>
-    Threadator(void (Class::*pFunction)() const, Class* pObject) :
+    Thread(void (Class::*pFunction)() const, Class* pObject) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -1361,8 +1500,10 @@ class Threadator {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
-        ThreadDataMethodConst0<Class>* pThreadData = new ThreadDataMethodConst0<Class>(pFunction, pObject);
-        int result = pthread_create(&_id, _attr, &startThreadMethodConst0<Class>, pThreadData);
+        ThreadDataMethodConst0<Class>* pThreadData =
+            new ThreadDataMethodConst0<Class>(pFunction, pObject);
+        int result = pthread_create(
+            &_id, _attr, &startThreadMethodConst0<Class>, pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -1372,7 +1513,8 @@ class Threadator {
   private:
     template<typename Class>
     struct ThreadDataMethodConst0 {
-        ThreadDataMethodConst0(void (Class::*pFunction)() const, Class* pObject) :
+        ThreadDataMethodConst0(void (Class::*pFunction)() const,
+                               Class* pObject) :
             _pFunction(pFunction),
             _pObject(pObject) {}
         void call() {
@@ -1384,7 +1526,8 @@ class Threadator {
 
     template<typename Class>
     static void* startThreadMethodConst0(void* data) {
-        ThreadDataMethodConst0<Class>* pThreadData = reinterpret_cast<ThreadDataMethodConst0<Class>*>(data);
+        ThreadDataMethodConst0<Class>* pThreadData =
+            reinterpret_cast<ThreadDataMethodConst0<Class>*>(data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
@@ -1392,7 +1535,7 @@ class Threadator {
 
   public:
     template<typename Class, typename A1>
-    Threadator(void (Class::*pFunction)(A1) const, Class* pObject, A1 a1) :
+    Thread(void (Class::*pFunction)(A1) const, Class* pObject, A1 a1) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -1404,8 +1547,10 @@ class Threadator {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
-        ThreadDataMethodConst1<Class, A1>* pThreadData = new ThreadDataMethodConst1<Class, A1>(pFunction, pObject, a1);
-        int result = pthread_create(&_id, _attr, &startThreadMethodConst1<Class, A1>, pThreadData);
+        ThreadDataMethodConst1<Class, A1>* pThreadData =
+            new ThreadDataMethodConst1<Class, A1>(pFunction, pObject, a1);
+        int result = pthread_create(
+            &_id, _attr, &startThreadMethodConst1<Class, A1>, pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -1415,7 +1560,8 @@ class Threadator {
   private:
     template<typename Class, typename A1>
     struct ThreadDataMethodConst1 {
-        ThreadDataMethodConst1(void (Class::*pFunction)(A1) const, Class* pObject, A1 a1) :
+        ThreadDataMethodConst1(void (Class::*pFunction)(A1) const,
+                               Class* pObject, A1 a1) :
             _pFunction(pFunction),
             _pObject(pObject),
             _a1(a1) {}
@@ -1429,7 +1575,8 @@ class Threadator {
 
     template<typename Class, typename A1>
     static void* startThreadMethodConst1(void* data) {
-        ThreadDataMethodConst1<Class, A1>* pThreadData = reinterpret_cast<ThreadDataMethodConst1<Class, A1>*>(data);
+        ThreadDataMethodConst1<Class, A1>* pThreadData =
+            reinterpret_cast<ThreadDataMethodConst1<Class, A1>*>(data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
@@ -1437,7 +1584,8 @@ class Threadator {
 
   public:
     template<typename Class, typename A1, typename A2>
-    Threadator(void (Class::*pFunction)(A1, A2) const, Class* pObject, A1 a1, A2 a2) :
+    Thread(void (Class::*pFunction)(A1, A2) const, Class* pObject, A1 a1,
+           A2 a2) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -1445,13 +1593,16 @@ class Threadator {
     }
 
     template<typename Class, typename A1, typename A2>
-    void start(void (Class::*pFunction)(A1, A2) const, Class* pObject, A1 a1, A2 a2) {
+    void start(void (Class::*pFunction)(A1, A2) const, Class* pObject, A1 a1,
+               A2 a2) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
         ThreadDataMethodConst2<Class, A1, A2>* pThreadData =
-            new ThreadDataMethodConst2<Class, A1, A2>(pFunction, pObject, a1, a2);
-        int result = pthread_create(&_id, _attr, &startThreadMethodConst2<Class, A1, A2>, pThreadData);
+            new ThreadDataMethodConst2<Class, A1, A2>(pFunction, pObject, a1,
+                                                      a2);
+        int result = pthread_create(
+            &_id, _attr, &startThreadMethodConst2<Class, A1, A2>, pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -1461,7 +1612,8 @@ class Threadator {
   private:
     template<typename Class, typename A1, typename A2>
     struct ThreadDataMethodConst2 {
-        ThreadDataMethodConst2(void (Class::*pFunction)(A1, A2) const, Class* pObject, A1 a1, A2 a2) :
+        ThreadDataMethodConst2(void (Class::*pFunction)(A1, A2) const,
+                               Class* pObject, A1 a1, A2 a2) :
             _pFunction(pFunction),
             _pObject(pObject),
             _a1(a1),
@@ -1486,7 +1638,8 @@ class Threadator {
 
   public:
     template<typename Class, typename A1, typename A2, typename A3>
-    Threadator(void (Class::*pFunction)(A1, A2, A3) const, Class* pObject, A1 a1, A2 a2, A3 a3) :
+    Thread(void (Class::*pFunction)(A1, A2, A3) const, Class* pObject, A1 a1,
+           A2 a2, A3 a3) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -1494,13 +1647,17 @@ class Threadator {
     }
 
     template<typename Class, typename A1, typename A2, typename A3>
-    void start(void (Class::*pFunction)(A1, A2, A3) const, Class* pObject, A1 a1, A2 a2, A3 a3) {
+    void start(void (Class::*pFunction)(A1, A2, A3) const, Class* pObject,
+               A1 a1, A2 a2, A3 a3) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
         ThreadDataMethodConst3<Class, A1, A2, A3>* pThreadData =
-            new ThreadDataMethodConst3<Class, A1, A2, A3>(pFunction, pObject, a1, a2, a3);
-        int result = pthread_create(&_id, _attr, &startThreadMethodConst3<Class, A1, A2, A3>, pThreadData);
+            new ThreadDataMethodConst3<Class, A1, A2, A3>(pFunction, pObject,
+                                                          a1, a2, a3);
+        int result = pthread_create(&_id, _attr,
+                                    &startThreadMethodConst3<Class, A1, A2, A3>,
+                                    pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -1510,7 +1667,8 @@ class Threadator {
   private:
     template<typename Class, typename A1, typename A2, typename A3>
     struct ThreadDataMethodConst3 {
-        ThreadDataMethodConst3(void (Class::*pFunction)(A1, A2, A3) const, Class* pObject, A1 a1, A2 a2, A3 a3) :
+        ThreadDataMethodConst3(void (Class::*pFunction)(A1, A2, A3) const,
+                               Class* pObject, A1 a1, A2 a2, A3 a3) :
             _pFunction(pFunction),
             _pObject(pObject),
             _a1(a1),
@@ -1537,7 +1695,8 @@ class Threadator {
 
   public:
     template<typename Class, typename A1, typename A2, typename A3, typename A4>
-    Threadator(void (Class::*pFunction)(A1, A2, A3, A4) const, Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4) :
+    Thread(void (Class::*pFunction)(A1, A2, A3, A4) const, Class* pObject,
+           A1 a1, A2 a2, A3 a3, A4 a4) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -1545,13 +1704,17 @@ class Threadator {
     }
 
     template<typename Class, typename A1, typename A2, typename A3, typename A4>
-    void start(void (Class::*pFunction)(A1, A2, A3, A4) const, Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4) {
+    void start(void (Class::*pFunction)(A1, A2, A3, A4) const, Class* pObject,
+               A1 a1, A2 a2, A3 a3, A4 a4) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
         ThreadDataMethodConst4<Class, A1, A2, A3, A4>* pThreadData =
-            new ThreadDataMethodConst4<Class, A1, A2, A3, A4>(pFunction, pObject, a1, a2, a3, a4);
-        int result = pthread_create(&_id, _attr, &startThreadMethodConst4<Class, A1, A2, A3, A4>, pThreadData);
+            new ThreadDataMethodConst4<Class, A1, A2, A3, A4>(
+                pFunction, pObject, a1, a2, a3, a4);
+        int result = pthread_create(
+            &_id, _attr, &startThreadMethodConst4<Class, A1, A2, A3, A4>,
+            pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -1561,8 +1724,8 @@ class Threadator {
   private:
     template<typename Class, typename A1, typename A2, typename A3, typename A4>
     struct ThreadDataMethodConst4 {
-        ThreadDataMethodConst4(void (Class::*pFunction)(A1, A2, A3, A4) const, Class* pObject, A1 a1, A2 a2, A3 a3,
-                               A4 a4) :
+        ThreadDataMethodConst4(void (Class::*pFunction)(A1, A2, A3, A4) const,
+                               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4) :
             _pFunction(pFunction),
             _pObject(pObject),
             _a1(a1),
@@ -1583,29 +1746,37 @@ class Threadator {
     template<typename Class, typename A1, typename A2, typename A3, typename A4>
     static void* startThreadMethodConst4(void* data) {
         ThreadDataMethodConst4<Class, A1, A2, A3, A4>* pThreadData =
-            reinterpret_cast<ThreadDataMethodConst4<Class, A1, A2, A3, A4>*>(data);
+            reinterpret_cast<ThreadDataMethodConst4<Class, A1, A2, A3, A4>*>(
+                data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
     }
 
   public:
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5>
-    Threadator(void (Class::*pFunction)(A1, A2, A3, A4, A5) const, Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) :
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5>
+    Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5) const, Class* pObject,
+           A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4, a5);
     }
 
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5>
-    void start(void (Class::*pFunction)(A1, A2, A3, A4, A5) const, Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5>
+    void start(void (Class::*pFunction)(A1, A2, A3, A4, A5) const,
+               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
         ThreadDataMethodConst5<Class, A1, A2, A3, A4, A5>* pThreadData =
-            new ThreadDataMethodConst5<Class, A1, A2, A3, A4, A5>(pFunction, pObject, a1, a2, a3, a4, a5);
-        int result = pthread_create(&_id, _attr, &startThreadMethodConst5<Class, A1, A2, A3, A4, A5>, pThreadData);
+            new ThreadDataMethodConst5<Class, A1, A2, A3, A4, A5>(
+                pFunction, pObject, a1, a2, a3, a4, a5);
+        int result = pthread_create(
+            &_id, _attr, &startThreadMethodConst5<Class, A1, A2, A3, A4, A5>,
+            pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -1613,10 +1784,13 @@ class Threadator {
     }
 
   private:
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5>
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5>
     struct ThreadDataMethodConst5 {
-        ThreadDataMethodConst5(void (Class::*pFunction)(A1, A2, A3, A4, A5) const, Class* pObject, A1 a1, A2 a2, A3 a3,
-                               A4 a4, A5 a5) :
+        ThreadDataMethodConst5(void (Class::*pFunction)(A1, A2, A3, A4, A5)
+                                   const,
+                               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
+                               A5 a5) :
             _pFunction(pFunction),
             _pObject(pObject),
             _a1(a1),
@@ -1636,34 +1810,42 @@ class Threadator {
         A5 _a5;
     };
 
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5>
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5>
     static void* startThreadMethodConst5(void* data) {
         ThreadDataMethodConst5<Class, A1, A2, A3, A4, A5>* pThreadData =
-            reinterpret_cast<ThreadDataMethodConst5<Class, A1, A2, A3, A4, A5>*>(data);
+            reinterpret_cast<
+                ThreadDataMethodConst5<Class, A1, A2, A3, A4, A5>*>(data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
     }
 
   public:
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
-    Threadator(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6) const, Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
-               A5 a5, A6 a6) :
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6>
+    Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6) const,
+           Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4, a5, a6);
     }
 
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
-    void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6) const, Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
-               A5 a5, A6 a6) {
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6>
+    void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6) const,
+               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
         ThreadDataMethodConst6<Class, A1, A2, A3, A4, A5, A6>* pThreadData =
-            new ThreadDataMethodConst6<Class, A1, A2, A3, A4, A5, A6>(pFunction, pObject, a1, a2, a3, a4, a5, a6);
-        int result = pthread_create(&_id, _attr, &startThreadMethodConst6<Class, A1, A2, A3, A4, A5, A6>, pThreadData);
+            new ThreadDataMethodConst6<Class, A1, A2, A3, A4, A5, A6>(
+                pFunction, pObject, a1, a2, a3, a4, a5, a6);
+        int result = pthread_create(
+            &_id, _attr,
+            &startThreadMethodConst6<Class, A1, A2, A3, A4, A5, A6>,
+            pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -1671,10 +1853,13 @@ class Threadator {
     }
 
   private:
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6>
     struct ThreadDataMethodConst6 {
-        ThreadDataMethodConst6(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6) const, Class* pObject, A1 a1, A2 a2,
-                               A3 a3, A4 a4, A5 a5, A6 a6) :
+        ThreadDataMethodConst6(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6)
+                                   const,
+                               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
+                               A5 a5, A6 a6) :
             _pFunction(pFunction),
             _pObject(pObject),
             _a1(a1),
@@ -1696,36 +1881,43 @@ class Threadator {
         A6 _a6;
     };
 
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6>
     static void* startThreadMethodConst6(void* data) {
         ThreadDataMethodConst6<Class, A1, A2, A3, A4, A5, A6>* pThreadData =
-            reinterpret_cast<ThreadDataMethodConst6<Class, A1, A2, A3, A4, A5, A6>*>(data);
+            reinterpret_cast<
+                ThreadDataMethodConst6<Class, A1, A2, A3, A4, A5, A6>*>(data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
     }
 
   public:
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7>
-    Threadator(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7) const, Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
-               A5 a5, A6 a6, A7 a7) :
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7>
+    Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7) const,
+           Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4, a5, a6, a7);
     }
 
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7>
-    void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7) const, Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
-               A5 a5, A6 a6, A7 a7) {
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7>
+    void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7) const,
+               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
+               A7 a7) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
         ThreadDataMethodConst7<Class, A1, A2, A3, A4, A5, A6, A7>* pThreadData =
-            new ThreadDataMethodConst7<Class, A1, A2, A3, A4, A5, A6, A7>(pFunction, pObject, a1, a2, a3, a4, a5, a6,
-                                                                          a7);
-        int result =
-            pthread_create(&_id, _attr, &startThreadMethodConst7<Class, A1, A2, A3, A4, A5, A6, A7>, pThreadData);
+            new ThreadDataMethodConst7<Class, A1, A2, A3, A4, A5, A6, A7>(
+                pFunction, pObject, a1, a2, a3, a4, a5, a6, a7);
+        int result = pthread_create(
+            &_id, _attr,
+            &startThreadMethodConst7<Class, A1, A2, A3, A4, A5, A6, A7>,
+            pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -1733,10 +1925,13 @@ class Threadator {
     }
 
   private:
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7>
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7>
     struct ThreadDataMethodConst7 {
-        ThreadDataMethodConst7(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7) const, Class* pObject, A1 a1, A2 a2,
-                               A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) :
+        ThreadDataMethodConst7(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6,
+                                                        A7) const,
+                               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
+                               A5 a5, A6 a6, A7 a7) :
             _pFunction(pFunction),
             _pObject(pObject),
             _a1(a1),
@@ -1760,38 +1955,46 @@ class Threadator {
         A7 _a7;
     };
 
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7>
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7>
     static void* startThreadMethodConst7(void* data) {
         ThreadDataMethodConst7<Class, A1, A2, A3, A4, A5, A6, A7>* pThreadData =
-            reinterpret_cast<ThreadDataMethodConst7<Class, A1, A2, A3, A4, A5, A6, A7>*>(data);
+            reinterpret_cast<
+                ThreadDataMethodConst7<Class, A1, A2, A3, A4, A5, A6, A7>*>(
+                data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
     }
 
   public:
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7,
-             typename A8>
-    Threadator(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8) const, Class* pObject, A1 a1, A2 a2, A3 a3,
-               A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) :
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7, typename A8>
+    Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8) const,
+           Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
+           A8 a8) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8);
     }
 
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7,
-             typename A8>
-    void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8) const, Class* pObject, A1 a1, A2 a2, A3 a3,
-               A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7, typename A8>
+    void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8) const,
+               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
+               A8 a8) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
-        ThreadDataMethodConst8<Class, A1, A2, A3, A4, A5, A6, A7, A8>* pThreadData =
-            new ThreadDataMethodConst8<Class, A1, A2, A3, A4, A5, A6, A7, A8>(pFunction, pObject, a1, a2, a3, a4, a5,
-                                                                              a6, a7, a8);
-        int result =
-            pthread_create(&_id, _attr, &startThreadMethodConst8<Class, A1, A2, A3, A4, A5, A6, A7, A8>, pThreadData);
+        ThreadDataMethodConst8<Class, A1, A2, A3, A4, A5, A6, A7,
+                               A8>* pThreadData =
+            new ThreadDataMethodConst8<Class, A1, A2, A3, A4, A5, A6, A7, A8>(
+                pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8);
+        int result = pthread_create(
+            &_id, _attr,
+            &startThreadMethodConst8<Class, A1, A2, A3, A4, A5, A6, A7, A8>,
+            pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -1799,11 +2002,13 @@ class Threadator {
     }
 
   private:
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7,
-             typename A8>
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7, typename A8>
     struct ThreadDataMethodConst8 {
-        ThreadDataMethodConst8(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8) const, Class* pObject, A1 a1,
-                               A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) :
+        ThreadDataMethodConst8(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6,
+                                                        A7, A8) const,
+                               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
+                               A5 a5, A6 a6, A7 a7, A8 a8) :
             _pFunction(pFunction),
             _pObject(pObject),
             _a1(a1),
@@ -1829,39 +2034,47 @@ class Threadator {
         A8 _a8;
     };
 
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7,
-             typename A8>
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7, typename A8>
     static void* startThreadMethodConst8(void* data) {
-        ThreadDataMethodConst8<Class, A1, A2, A3, A4, A5, A6, A7, A8>* pThreadData =
-            reinterpret_cast<ThreadDataMethodConst8<Class, A1, A2, A3, A4, A5, A6, A7, A8>*>(data);
+        ThreadDataMethodConst8<Class, A1, A2, A3, A4, A5, A6, A7, A8>*
+            pThreadData = reinterpret_cast<
+                ThreadDataMethodConst8<Class, A1, A2, A3, A4, A5, A6, A7, A8>*>(
+                data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
     }
 
   public:
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7,
-             typename A8, typename A9>
-    Threadator(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9) const, Class* pObject, A1 a1, A2 a2, A3 a3,
-               A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) :
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7, typename A8, typename A9>
+    Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9) const,
+           Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
+           A8 a8, A9 a9) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
 
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7,
-             typename A8, typename A9>
-    void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9) const, Class* pObject, A1 a1, A2 a2, A3 a3,
-               A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7, typename A8, typename A9>
+    void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9)
+                   const,
+               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
+               A8 a8, A9 a9) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
-        ThreadDataMethodConst9<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9>* pThreadData =
-            new ThreadDataMethodConst9<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9>(pFunction, pObject, a1, a2, a3, a4,
-                                                                                  a5, a6, a7, a8, a9);
-        int result = pthread_create(&_id, _attr, &startThreadMethodConst9<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9>,
-                                    pThreadData);
+        ThreadDataMethodConst9<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9>*
+            pThreadData = new ThreadDataMethodConst9<Class, A1, A2, A3, A4, A5,
+                                                     A6, A7, A8, A9>(
+                pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8, a9);
+        int result = pthread_create(
+            &_id, _attr,
+            &startThreadMethodConst9<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9>,
+            pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -1869,11 +2082,13 @@ class Threadator {
     }
 
   private:
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7,
-             typename A8, typename A9>
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7, typename A8, typename A9>
     struct ThreadDataMethodConst9 {
-        ThreadDataMethodConst9(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9) const, Class* pObject,
-                               A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) :
+        ThreadDataMethodConst9(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6,
+                                                        A7, A8, A9) const,
+                               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
+                               A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) :
             _pFunction(pFunction),
             _pObject(pObject),
             _a1(a1),
@@ -1886,7 +2101,8 @@ class Threadator {
             _a8(a8),
             _a9(a9) {}
         void call() {
-            (_pObject->*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6, _a7, _a8, _a9);
+            (_pObject->*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6, _a7, _a8,
+                                    _a9);
         }
         void (Class::*_pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9) const;
         Class* _pObject;
@@ -1901,39 +2117,51 @@ class Threadator {
         A9 _a9;
     };
 
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7,
-             typename A8, typename A9>
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7, typename A8, typename A9>
     static void* startThreadMethodConst9(void* data) {
-        ThreadDataMethodConst9<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9>* pThreadData =
-            reinterpret_cast<ThreadDataMethodConst9<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9>*>(data);
+        ThreadDataMethodConst9<Class, A1, A2, A3, A4, A5, A6, A7, A8,
+                               A9>* pThreadData =
+            reinterpret_cast<ThreadDataMethodConst9<Class, A1, A2, A3, A4, A5,
+                                                    A6, A7, A8, A9>*>(data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
     }
 
   public:
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7,
-             typename A8, typename A9, typename A10>
-    Threadator(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) const, Class* pObject, A1 a1, A2 a2,
-               A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) :
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7, typename A8, typename A9,
+             typename A10>
+    Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)
+               const,
+           Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
+           A8 a8, A9 a9, A10 a10) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
     }
 
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7,
-             typename A8, typename A9, typename A10>
-    void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) const, Class* pObject, A1 a1, A2 a2,
-               A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) {
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7, typename A8, typename A9,
+             typename A10>
+    void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)
+                   const,
+               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
+               A8 a8, A9 a9, A10 a10) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
-        ThreadDataMethodConst10<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>* pThreadData =
-            new ThreadDataMethodConst10<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>(pFunction, pObject, a1, a2, a3,
-                                                                                        a4, a5, a6, a7, a8, a9, a10);
-        int result = pthread_create(
-            &_id, _attr, &startThreadMethodConst10<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>, pThreadData);
+        ThreadDataMethodConst10<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>*
+            pThreadData = new ThreadDataMethodConst10<Class, A1, A2, A3, A4, A5,
+                                                      A6, A7, A8, A9, A10>(
+                pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+        int result =
+            pthread_create(&_id, _attr,
+                           &startThreadMethodConst10<Class, A1, A2, A3, A4, A5,
+                                                     A6, A7, A8, A9, A10>,
+                           pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -1941,11 +2169,14 @@ class Threadator {
     }
 
   private:
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7,
-             typename A8, typename A9, typename A10>
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7, typename A8, typename A9,
+             typename A10>
     struct ThreadDataMethodConst10 {
-        ThreadDataMethodConst10(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) const, Class* pObject,
-                                A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) :
+        ThreadDataMethodConst10(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6,
+                                                         A7, A8, A9, A10) const,
+                                Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
+                                A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) :
             _pFunction(pFunction),
             _pObject(pObject),
             _a1(a1),
@@ -1959,9 +2190,11 @@ class Threadator {
             _a9(a9),
             _a10(a10) {}
         void call() {
-            (_pObject->*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6, _a7, _a8, _a9, _a10);
+            (_pObject->*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6, _a7, _a8, _a9,
+                                    _a10);
         }
-        void (Class::*_pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) const;
+        void (Class::*_pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9,
+                                  A10) const;
         Class* _pObject;
         A1 _a1;
         A2 _a2;
@@ -1975,17 +2208,19 @@ class Threadator {
         A10 _a10;
     };
 
-    template<typename Class, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7,
-             typename A8, typename A9, typename A10>
+    template<typename Class, typename A1, typename A2, typename A3, typename A4,
+             typename A5, typename A6, typename A7, typename A8, typename A9,
+             typename A10>
     static void* startThreadMethodConst10(void* data) {
-        ThreadDataMethodConst10<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>* pThreadData =
-            reinterpret_cast<ThreadDataMethodConst10<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>*>(data);
+        ThreadDataMethodConst10<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>*
+            pThreadData = reinterpret_cast<ThreadDataMethodConst10<
+                Class, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>*>(data);
         pThreadData->call();
         delete pThreadData;
         return NULL;
     }
 };
 
-} // namespace mblet
+} // namespace blet
 
-#endif // #ifndef _MBLET_THREADATOR_H_
+#endif // #ifndef _BLET_THREAD_H_

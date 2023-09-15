@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 
-#include "mblet/threadator.h"
+#include "blet/thread.h"
 
 struct MyTest {
     static void staticMethodVoid() {
@@ -60,9 +60,9 @@ bool MyTest::resultMethodVoidConst = false;
 std::vector<int> MyTest::resultStaticMethodArgs = std::vector<int>();
 std::vector<int> MyTest::resultMethodArgsConst = std::vector<int>();
 
-GTEST_TEST(threadator, staticMethodVoid) {
+GTEST_TEST(thread, staticMethodVoid) {
     MyTest::resultStaticMethodVoid = false;
-    mblet::Threadator thrd(&MyTest::staticMethodVoid);
+    blet::Thread thrd(&MyTest::staticMethodVoid);
     EXPECT_TRUE(thrd.joinable());
     thrd.join();
     EXPECT_TRUE(MyTest::resultStaticMethodVoid);
@@ -72,9 +72,9 @@ GTEST_TEST(threadator, staticMethodVoid) {
     EXPECT_TRUE(MyTest::resultStaticMethodVoid);
 }
 
-GTEST_TEST(threadator, staticMethodArg1) {
+GTEST_TEST(thread, staticMethodArg1) {
     int v = 42;
-    mblet::Threadator thrd;
+    blet::Thread thrd;
     thrd.start<int&>(&MyTest::staticMethodArg1, v);
     EXPECT_TRUE(thrd.joinable());
     thrd.join();
@@ -86,27 +86,27 @@ GTEST_TEST(threadator, staticMethodArg1) {
     EXPECT_EQ(MyTest::resultStaticMethodArgs[0], 44);
 }
 
-GTEST_TEST(threadator, staticMethodArg2) {
-    mblet::Threadator thrd(&MyTest::staticMethodArg2, 1, 2);
+GTEST_TEST(thread, staticMethodArg2) {
+    blet::Thread thrd(&MyTest::staticMethodArg2, 1, 2);
     EXPECT_TRUE(thrd.joinable());
     thrd.join();
     EXPECT_EQ(MyTest::resultStaticMethodArgs[0], 1);
     EXPECT_EQ(MyTest::resultStaticMethodArgs[1], 2);
 }
 
-GTEST_TEST(threadator, methodVoid) {
+GTEST_TEST(thread, methodVoid) {
     MyTest t;
     t.resultMethodVoid = false;
-    mblet::Threadator thrd(&MyTest::methodVoid, &t);
+    blet::Thread thrd(&MyTest::methodVoid, &t);
     EXPECT_TRUE(thrd.joinable());
     thrd.join();
     EXPECT_TRUE(t.resultMethodVoid);
 }
 
-GTEST_TEST(threadator, methodArg1) {
+GTEST_TEST(thread, methodArg1) {
     int i = 42;
     MyTest t;
-    mblet::Threadator thrd;
+    blet::Thread thrd;
     thrd.start<MyTest, int&>(&MyTest::methodArg1, &t, i);
     EXPECT_TRUE(thrd.joinable());
     thrd.join();
@@ -114,35 +114,35 @@ GTEST_TEST(threadator, methodArg1) {
     EXPECT_EQ(t.resultMethodArgs[0], 43);
 }
 
-GTEST_TEST(threadator, methodArg2) {
+GTEST_TEST(thread, methodArg2) {
     MyTest t;
-    mblet::Threadator thrd(&MyTest::methodArg2, &t, 1, 2);
+    blet::Thread thrd(&MyTest::methodArg2, &t, 1, 2);
     EXPECT_TRUE(thrd.joinable());
     thrd.join();
     EXPECT_EQ(t.resultMethodArgs[0], 1);
     EXPECT_EQ(t.resultMethodArgs[1], 2);
 }
 
-GTEST_TEST(threadator, methodVoidConst) {
+GTEST_TEST(thread, methodVoidConst) {
     MyTest t;
     t.resultMethodVoidConst = false;
-    mblet::Threadator thrd(&MyTest::methodVoidConst, &t);
+    blet::Thread thrd(&MyTest::methodVoidConst, &t);
     EXPECT_TRUE(thrd.joinable());
     thrd.join();
     EXPECT_TRUE(t.resultMethodVoidConst);
 }
 
-GTEST_TEST(threadator, methodArg1Const) {
+GTEST_TEST(thread, methodArg1Const) {
     MyTest t;
-    mblet::Threadator thrd(&MyTest::methodArg1Const, &t, 1);
+    blet::Thread thrd(&MyTest::methodArg1Const, &t, 1);
     EXPECT_TRUE(thrd.joinable());
     thrd.join();
     EXPECT_EQ(t.resultMethodArgsConst[0], 1);
 }
 
-GTEST_TEST(threadator, methodArg2Const) {
+GTEST_TEST(thread, methodArg2Const) {
     MyTest t;
-    mblet::Threadator thrd(&MyTest::methodArg2Const, &t, 1, 2);
+    blet::Thread thrd(&MyTest::methodArg2Const, &t, 1, 2);
     EXPECT_TRUE(thrd.joinable());
     thrd.join();
     EXPECT_EQ(t.resultMethodArgsConst[0], 1);
