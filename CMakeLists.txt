@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(threadator VERSION 1.0.0 LANGUAGES CXX)
+project(blet_thread VERSION 1.1.1 LANGUAGES CXX)
 
 # OPTIONS
 option(BUILD_EXAMPLE "Build example binaries" OFF)

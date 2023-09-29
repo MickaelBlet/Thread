@@ -1,4 +1,4 @@
-set(library_project_name threadator)
+set(library_project_name "${PROJECT_NAME}")
 
 get_target_property(library_include_dirs "${library_project_name}" INTERFACE_INCLUDE_DIRECTORIES)
 
