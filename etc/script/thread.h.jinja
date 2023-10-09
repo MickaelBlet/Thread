@@ -126,7 +126,7 @@ class Thread {
 {% if i > 1 or type == 'Method' or type == 'MethodConst' %}
     template<{% if type == 'Method' or type == 'MethodConst' %}typename Class{% if i > 1 %}, {% endif %}{% endif %}{% for i in range(1, i) %}{% if i > 1 %}, {% endif %}typename A{{i}}{% endfor %}>
 {% endif %}
-    Thread(void ({% if type == 'Method' or type == 'MethodConst' %}Class::{% endif %}*pFunction)({% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}}{% endfor %}){% if type == 'MethodConst' %} const{% endif %}{% if i > 1 or type == 'Method' or type == 'MethodConst' %}, {% endif %}{% if type == 'Method' or type == 'MethodConst' %}Class* pObject{% if i > 1 %}, {% endif %}{% endif %}{% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}} a{{i}}{% endfor %}) :
+    Thread(void ({% if type == 'Method' or type == 'MethodConst' %}Class::{% endif %}*pFunction)({% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}}{% endfor %}){% if type == 'MethodConst' %} const{% endif %}{% if i > 1 or type == 'Method' or type == 'MethodConst' %}, {% endif %}{% if type == 'Method' or type == 'MethodConst' %}{% if type == 'MethodConst' %}const {% endif %}Class* pObject{% if i > 1 %}, {% endif %}{% endif %}{% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}} a{{i}}{% endfor %}) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -136,7 +136,7 @@ class Thread {
 {% if i > 1 or type == 'Method' or type == 'MethodConst' %}
     template<{% if type == 'Method' or type == 'MethodConst' %}typename Class{% if i > 1 %}, {% endif %}{% endif %}{% for i in range(1, i) %}{% if i > 1 %}, {% endif %}typename A{{i}}{% endfor %}>
 {% endif %}
-    void start(void ({% if type == 'Method' or type == 'MethodConst' %}Class::{% endif %}*pFunction)({% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}}{% endfor %}){% if type == 'MethodConst' %} const{% endif %}{% if i > 1 or type == 'Method' or type == 'MethodConst' %}, {% endif %}{% if type == 'Method' or type == 'MethodConst' %}Class* pObject{% if i > 1 %}, {% endif %}{% endif %}{% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}} a{{i}}{% endfor %}) {
+    void start(void ({% if type == 'Method' or type == 'MethodConst' %}Class::{% endif %}*pFunction)({% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}}{% endfor %}){% if type == 'MethodConst' %} const{% endif %}{% if i > 1 or type == 'Method' or type == 'MethodConst' %}, {% endif %}{% if type == 'Method' or type == 'MethodConst' %}{% if type == 'MethodConst' %}const {% endif %}Class* pObject{% if i > 1 %}, {% endif %}{% endif %}{% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}} a{{i}}{% endfor %}) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
@@ -165,7 +165,7 @@ class Thread {
     template<{% if type == 'Method' or type == 'MethodConst' %}typename Class{% if i > 1 %}, {% endif %}{% endif %}{% for i in range(1, i) %}{% if i > 1 %}, {% endif %}typename A{{i}}{% endfor %}>
 {% endif %}
     struct ThreadData{{type}}{{i - 1}} {
-        ThreadData{{type}}{{i - 1}}(void ({% if type == 'Method' or type == 'MethodConst' %}Class::{% endif %}*pFunction)({% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}}{% endfor %}){% if type == 'MethodConst' %} const{% endif %}{% if i > 1 or type == 'Method' or type == 'MethodConst' %}, {% endif %}{% if type == 'Method' or type == 'MethodConst' %}Class* pObject{% if i > 1 %}, {% endif %}{% endif %}{% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}} a{{i}}{% endfor %}) :
+        ThreadData{{type}}{{i - 1}}(void ({% if type == 'Method' or type == 'MethodConst' %}Class::{% endif %}*pFunction)({% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}}{% endfor %}){% if type == 'MethodConst' %} const{% endif %}{% if i > 1 or type == 'Method' or type == 'MethodConst' %}, {% endif %}{% if type == 'Method' or type == 'MethodConst' %}{% if type == 'MethodConst' %}const {% endif %}Class* pObject{% if i > 1 %}, {% endif %}{% endif %}{% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}} a{{i}}{% endfor %}) :
             _pFunction(pFunction)
             {%- if i > 1 or type == 'Method' or type == 'MethodConst' %}, {% endif %}
             {%- if type == 'Method' or type == 'MethodConst' %}_pObject(pObject){% if i > 1 %}, {% endif %}{% endif %}{% for i in range(1, i) %}{% if i > 1 %}, {% endif %}_a{{i}}(a{{i}}){% endfor %}
@@ -174,7 +174,7 @@ class Thread {
             ({% if type == 'Method' or type == 'MethodConst' %}_pObject->{% endif %}*_pFunction)({% for i in range(1, i) %}{% if i > 1 %}, {% endif %}_a{{i}}{% endfor %});
         }
         void ({% if type == 'Method' or type == 'MethodConst' %}Class::{% endif %}*_pFunction)({% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}}{% endfor %}){% if type == 'MethodConst' %} const{% endif %};
-        {% if type == 'Method' or type == 'MethodConst' %}Class* _pObject;{% endif %}
+        {% if type == 'Method' or type == 'MethodConst' %}{% if type == 'MethodConst' %}const {% endif %}Class* _pObject;{% endif %}
 {% for i in range(1, i) %}
         A{{i}} _a{{i}};
 {% endfor %}

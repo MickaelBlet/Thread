@@ -1488,7 +1488,7 @@ class Thread {
 
   public:
     template<typename Class>
-    Thread(void (Class::*pFunction)() const, Class* pObject) :
+    Thread(void (Class::*pFunction)() const, const Class* pObject) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -1496,7 +1496,7 @@ class Thread {
     }
 
     template<typename Class>
-    void start(void (Class::*pFunction)() const, Class* pObject) {
+    void start(void (Class::*pFunction)() const, const Class* pObject) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
@@ -1514,14 +1514,14 @@ class Thread {
     template<typename Class>
     struct ThreadDataMethodConst0 {
         ThreadDataMethodConst0(void (Class::*pFunction)() const,
-                               Class* pObject) :
+                               const Class* pObject) :
             _pFunction(pFunction),
             _pObject(pObject) {}
         void call() {
             (_pObject->*_pFunction)();
         }
         void (Class::*_pFunction)() const;
-        Class* _pObject;
+        const Class* _pObject;
     };
 
     template<typename Class>
@@ -1535,7 +1535,7 @@ class Thread {
 
   public:
     template<typename Class, typename A1>
-    Thread(void (Class::*pFunction)(A1) const, Class* pObject, A1 a1) :
+    Thread(void (Class::*pFunction)(A1) const, const Class* pObject, A1 a1) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -1543,7 +1543,8 @@ class Thread {
     }
 
     template<typename Class, typename A1>
-    void start(void (Class::*pFunction)(A1) const, Class* pObject, A1 a1) {
+    void start(void (Class::*pFunction)(A1) const, const Class* pObject,
+               A1 a1) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
@@ -1561,7 +1562,7 @@ class Thread {
     template<typename Class, typename A1>
     struct ThreadDataMethodConst1 {
         ThreadDataMethodConst1(void (Class::*pFunction)(A1) const,
-                               Class* pObject, A1 a1) :
+                               const Class* pObject, A1 a1) :
             _pFunction(pFunction),
             _pObject(pObject),
             _a1(a1) {}
@@ -1569,7 +1570,7 @@ class Thread {
             (_pObject->*_pFunction)(_a1);
         }
         void (Class::*_pFunction)(A1) const;
-        Class* _pObject;
+        const Class* _pObject;
         A1 _a1;
     };
 
@@ -1584,7 +1585,7 @@ class Thread {
 
   public:
     template<typename Class, typename A1, typename A2>
-    Thread(void (Class::*pFunction)(A1, A2) const, Class* pObject, A1 a1,
+    Thread(void (Class::*pFunction)(A1, A2) const, const Class* pObject, A1 a1,
            A2 a2) :
         _id(0),
         _isDetached(false),
@@ -1593,8 +1594,8 @@ class Thread {
     }
 
     template<typename Class, typename A1, typename A2>
-    void start(void (Class::*pFunction)(A1, A2) const, Class* pObject, A1 a1,
-               A2 a2) {
+    void start(void (Class::*pFunction)(A1, A2) const, const Class* pObject,
+               A1 a1, A2 a2) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
@@ -1613,7 +1614,7 @@ class Thread {
     template<typename Class, typename A1, typename A2>
     struct ThreadDataMethodConst2 {
         ThreadDataMethodConst2(void (Class::*pFunction)(A1, A2) const,
-                               Class* pObject, A1 a1, A2 a2) :
+                               const Class* pObject, A1 a1, A2 a2) :
             _pFunction(pFunction),
             _pObject(pObject),
             _a1(a1),
@@ -1622,7 +1623,7 @@ class Thread {
             (_pObject->*_pFunction)(_a1, _a2);
         }
         void (Class::*_pFunction)(A1, A2) const;
-        Class* _pObject;
+        const Class* _pObject;
         A1 _a1;
         A2 _a2;
     };
@@ -1638,8 +1639,8 @@ class Thread {
 
   public:
     template<typename Class, typename A1, typename A2, typename A3>
-    Thread(void (Class::*pFunction)(A1, A2, A3) const, Class* pObject, A1 a1,
-           A2 a2, A3 a3) :
+    Thread(void (Class::*pFunction)(A1, A2, A3) const, const Class* pObject,
+           A1 a1, A2 a2, A3 a3) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -1647,7 +1648,7 @@ class Thread {
     }
 
     template<typename Class, typename A1, typename A2, typename A3>
-    void start(void (Class::*pFunction)(A1, A2, A3) const, Class* pObject,
+    void start(void (Class::*pFunction)(A1, A2, A3) const, const Class* pObject,
                A1 a1, A2 a2, A3 a3) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
@@ -1668,7 +1669,7 @@ class Thread {
     template<typename Class, typename A1, typename A2, typename A3>
     struct ThreadDataMethodConst3 {
         ThreadDataMethodConst3(void (Class::*pFunction)(A1, A2, A3) const,
-                               Class* pObject, A1 a1, A2 a2, A3 a3) :
+                               const Class* pObject, A1 a1, A2 a2, A3 a3) :
             _pFunction(pFunction),
             _pObject(pObject),
             _a1(a1),
@@ -1678,7 +1679,7 @@ class Thread {
             (_pObject->*_pFunction)(_a1, _a2, _a3);
         }
         void (Class::*_pFunction)(A1, A2, A3) const;
-        Class* _pObject;
+        const Class* _pObject;
         A1 _a1;
         A2 _a2;
         A3 _a3;
@@ -1695,7 +1696,7 @@ class Thread {
 
   public:
     template<typename Class, typename A1, typename A2, typename A3, typename A4>
-    Thread(void (Class::*pFunction)(A1, A2, A3, A4) const, Class* pObject,
+    Thread(void (Class::*pFunction)(A1, A2, A3, A4) const, const Class* pObject,
            A1 a1, A2 a2, A3 a3, A4 a4) :
         _id(0),
         _isDetached(false),
@@ -1704,8 +1705,8 @@ class Thread {
     }
 
     template<typename Class, typename A1, typename A2, typename A3, typename A4>
-    void start(void (Class::*pFunction)(A1, A2, A3, A4) const, Class* pObject,
-               A1 a1, A2 a2, A3 a3, A4 a4) {
+    void start(void (Class::*pFunction)(A1, A2, A3, A4) const,
+               const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
@@ -1725,7 +1726,8 @@ class Thread {
     template<typename Class, typename A1, typename A2, typename A3, typename A4>
     struct ThreadDataMethodConst4 {
         ThreadDataMethodConst4(void (Class::*pFunction)(A1, A2, A3, A4) const,
-                               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4) :
+                               const Class* pObject, A1 a1, A2 a2, A3 a3,
+                               A4 a4) :
             _pFunction(pFunction),
             _pObject(pObject),
             _a1(a1),
@@ -1736,7 +1738,7 @@ class Thread {
             (_pObject->*_pFunction)(_a1, _a2, _a3, _a4);
         }
         void (Class::*_pFunction)(A1, A2, A3, A4) const;
-        Class* _pObject;
+        const Class* _pObject;
         A1 _a1;
         A2 _a2;
         A3 _a3;
@@ -1756,8 +1758,8 @@ class Thread {
   public:
     template<typename Class, typename A1, typename A2, typename A3, typename A4,
              typename A5>
-    Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5) const, Class* pObject,
-           A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) :
+    Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5) const,
+           const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -1767,7 +1769,7 @@ class Thread {
     template<typename Class, typename A1, typename A2, typename A3, typename A4,
              typename A5>
     void start(void (Class::*pFunction)(A1, A2, A3, A4, A5) const,
-               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+               const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
@@ -1789,7 +1791,7 @@ class Thread {
     struct ThreadDataMethodConst5 {
         ThreadDataMethodConst5(void (Class::*pFunction)(A1, A2, A3, A4, A5)
                                    const,
-                               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
+                               const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
                                A5 a5) :
             _pFunction(pFunction),
             _pObject(pObject),
@@ -1802,7 +1804,7 @@ class Thread {
             (_pObject->*_pFunction)(_a1, _a2, _a3, _a4, _a5);
         }
         void (Class::*_pFunction)(A1, A2, A3, A4, A5) const;
-        Class* _pObject;
+        const Class* _pObject;
         A1 _a1;
         A2 _a2;
         A3 _a3;
@@ -1825,7 +1827,7 @@ class Thread {
     template<typename Class, typename A1, typename A2, typename A3, typename A4,
              typename A5, typename A6>
     Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6) const,
-           Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) :
+           const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -1835,7 +1837,7 @@ class Thread {
     template<typename Class, typename A1, typename A2, typename A3, typename A4,
              typename A5, typename A6>
     void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6) const,
-               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
+               const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
@@ -1858,7 +1860,7 @@ class Thread {
     struct ThreadDataMethodConst6 {
         ThreadDataMethodConst6(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6)
                                    const,
-                               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
+                               const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
                                A5 a5, A6 a6) :
             _pFunction(pFunction),
             _pObject(pObject),
@@ -1872,7 +1874,7 @@ class Thread {
             (_pObject->*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6);
         }
         void (Class::*_pFunction)(A1, A2, A3, A4, A5, A6) const;
-        Class* _pObject;
+        const Class* _pObject;
         A1 _a1;
         A2 _a2;
         A3 _a3;
@@ -1896,7 +1898,8 @@ class Thread {
     template<typename Class, typename A1, typename A2, typename A3, typename A4,
              typename A5, typename A6, typename A7>
     Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7) const,
-           Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) :
+           const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
+           A7 a7) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -1906,7 +1909,7 @@ class Thread {
     template<typename Class, typename A1, typename A2, typename A3, typename A4,
              typename A5, typename A6, typename A7>
     void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7) const,
-               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
+               const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
                A7 a7) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
@@ -1930,7 +1933,7 @@ class Thread {
     struct ThreadDataMethodConst7 {
         ThreadDataMethodConst7(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6,
                                                         A7) const,
-                               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
+                               const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
                                A5 a5, A6 a6, A7 a7) :
             _pFunction(pFunction),
             _pObject(pObject),
@@ -1945,7 +1948,7 @@ class Thread {
             (_pObject->*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6, _a7);
         }
         void (Class::*_pFunction)(A1, A2, A3, A4, A5, A6, A7) const;
-        Class* _pObject;
+        const Class* _pObject;
         A1 _a1;
         A2 _a2;
         A3 _a3;
@@ -1971,8 +1974,8 @@ class Thread {
     template<typename Class, typename A1, typename A2, typename A3, typename A4,
              typename A5, typename A6, typename A7, typename A8>
     Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8) const,
-           Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
-           A8 a8) :
+           const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
+           A7 a7, A8 a8) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -1982,8 +1985,8 @@ class Thread {
     template<typename Class, typename A1, typename A2, typename A3, typename A4,
              typename A5, typename A6, typename A7, typename A8>
     void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8) const,
-               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
-               A8 a8) {
+               const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
+               A7 a7, A8 a8) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
@@ -2007,7 +2010,7 @@ class Thread {
     struct ThreadDataMethodConst8 {
         ThreadDataMethodConst8(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6,
                                                         A7, A8) const,
-                               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
+                               const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
                                A5 a5, A6 a6, A7 a7, A8 a8) :
             _pFunction(pFunction),
             _pObject(pObject),
@@ -2023,7 +2026,7 @@ class Thread {
             (_pObject->*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6, _a7, _a8);
         }
         void (Class::*_pFunction)(A1, A2, A3, A4, A5, A6, A7, A8) const;
-        Class* _pObject;
+        const Class* _pObject;
         A1 _a1;
         A2 _a2;
         A3 _a3;
@@ -2050,8 +2053,8 @@ class Thread {
     template<typename Class, typename A1, typename A2, typename A3, typename A4,
              typename A5, typename A6, typename A7, typename A8, typename A9>
     Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9) const,
-           Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
-           A8 a8, A9 a9) :
+           const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
+           A7 a7, A8 a8, A9 a9) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -2062,8 +2065,8 @@ class Thread {
              typename A5, typename A6, typename A7, typename A8, typename A9>
     void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9)
                    const,
-               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
-               A8 a8, A9 a9) {
+               const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
+               A7 a7, A8 a8, A9 a9) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
@@ -2087,7 +2090,7 @@ class Thread {
     struct ThreadDataMethodConst9 {
         ThreadDataMethodConst9(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6,
                                                         A7, A8, A9) const,
-                               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
+                               const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
                                A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) :
             _pFunction(pFunction),
             _pObject(pObject),
@@ -2105,7 +2108,7 @@ class Thread {
                                     _a9);
         }
         void (Class::*_pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9) const;
-        Class* _pObject;
+        const Class* _pObject;
         A1 _a1;
         A2 _a2;
         A3 _a3;
@@ -2135,8 +2138,8 @@ class Thread {
              typename A10>
     Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)
                const,
-           Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
-           A8 a8, A9 a9, A10 a10) :
+           const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
+           A7 a7, A8 a8, A9 a9, A10 a10) :
         _id(0),
         _isDetached(false),
         _attr(NULL) {
@@ -2148,8 +2151,8 @@ class Thread {
              typename A10>
     void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)
                    const,
-               Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
-               A8 a8, A9 a9, A10 a10) {
+               const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
+               A7 a7, A8 a8, A9 a9, A10 a10) {
         if (_id != 0) {
             throw Exception(_id, "Thread already started");
         }
@@ -2175,8 +2178,9 @@ class Thread {
     struct ThreadDataMethodConst10 {
         ThreadDataMethodConst10(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6,
                                                          A7, A8, A9, A10) const,
-                                Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
-                                A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) :
+                                const Class* pObject, A1 a1, A2 a2, A3 a3,
+                                A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9,
+                                A10 a10) :
             _pFunction(pFunction),
             _pObject(pObject),
             _a1(a1),
@@ -2195,7 +2199,7 @@ class Thread {
         }
         void (Class::*_pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9,
                                   A10) const;
-        Class* _pObject;
+        const Class* _pObject;
         A1 _a1;
         A2 _a2;
         A3 _a3;
