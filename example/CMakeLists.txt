@@ -17,7 +17,7 @@ foreach(file ${example_files})
             CXX_STANDARD_REQUIRED ON
             CXX_EXTENSIONS OFF
             NO_SYSTEM_FROM_IMPORTED ON
-            COMPILE_FLAGS "-pedantic -Wall -Wextra -Werror"
+            COMPILE_FLAGS "-std=c++98 -pedantic -Wall -Wextra -Werror"
             INCLUDE_DIRECTORIES "${library_include_dirs}"
             LINK_LIBRARIES "pthread"
     )

@@ -34,9 +34,9 @@ namespace blet {
 
 class Thread {
   private:
-    pthread_t _id;
+    ::pthread_t _id;
     bool _isDetached;
-    pthread_attr_t* _attr;
+    ::pthread_attr_t* _attr;
 
   public:
     class Exception : public std::exception {
@@ -52,7 +52,7 @@ class Thread {
 
       protected:
         const char* _what;
-        pthread_t _id;
+        ::pthread_t _id;
     };
 
     Thread() :
@@ -60,9 +60,9 @@ class Thread {
         _isDetached(false),
         _attr(NULL) {}
 
-    virtual ~Thread() throw() {
+    virtual ~Thread() {
         if (_id != 0 && !_isDetached) {
-            throw Exception(_id, "Thread is not joining");
+            ::pthread_join(_id, NULL);
         }
     }
 
@@ -70,7 +70,7 @@ class Thread {
         if (_id == 0 || _isDetached) {
             throw Exception(_id, "Thread is not joinable");
         }
-        pthread_join(_id, NULL);
+        ::pthread_join(_id, NULL);
         _id = 0;
     }
 
@@ -83,7 +83,7 @@ class Thread {
             throw Exception(_id, "Thread is not cancelable");
         }
 
-        int result = pthread_cancel(_id);
+        int result = ::pthread_cancel(_id);
         if (result != 0) {
             throw Exception(_id, "Failed to cancel thread");
         }
@@ -94,7 +94,7 @@ class Thread {
             throw Exception(_id, "Thread is not detachable");
         }
 
-        int result = pthread_detach(_id);
+        int result = ::pthread_detach(_id);
         if (result != 0) {
             throw Exception(_id, "Failed to detach thread");
         }
@@ -131,7 +131,7 @@ class Thread {
         }
         ThreadDataStatic0* pThreadData = new ThreadDataStatic0(pFunction);
         int result =
-            pthread_create(&_id, _attr, &startThreadStatic0, pThreadData);
+            ::pthread_create(&_id, _attr, &startThreadStatic0, pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -173,7 +173,7 @@ class Thread {
         ThreadDataStatic1<A1>* pThreadData =
             new ThreadDataStatic1<A1>(pFunction, a1);
         int result =
-            pthread_create(&_id, _attr, &startThreadStatic1<A1>, pThreadData);
+            ::pthread_create(&_id, _attr, &startThreadStatic1<A1>, pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -218,8 +218,8 @@ class Thread {
         }
         ThreadDataStatic2<A1, A2>* pThreadData =
             new ThreadDataStatic2<A1, A2>(pFunction, a1, a2);
-        int result = pthread_create(&_id, _attr, &startThreadStatic2<A1, A2>,
-                                    pThreadData);
+        int result = ::pthread_create(&_id, _attr, &startThreadStatic2<A1, A2>,
+                                      pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -266,7 +266,7 @@ class Thread {
         }
         ThreadDataStatic3<A1, A2, A3>* pThreadData =
             new ThreadDataStatic3<A1, A2, A3>(pFunction, a1, a2, a3);
-        int result = pthread_create(
+        int result = ::pthread_create(
             &_id, _attr, &startThreadStatic3<A1, A2, A3>, pThreadData);
         if (result != 0) {
             delete pThreadData;
@@ -316,7 +316,7 @@ class Thread {
         }
         ThreadDataStatic4<A1, A2, A3, A4>* pThreadData =
             new ThreadDataStatic4<A1, A2, A3, A4>(pFunction, a1, a2, a3, a4);
-        int result = pthread_create(
+        int result = ::pthread_create(
             &_id, _attr, &startThreadStatic4<A1, A2, A3, A4>, pThreadData);
         if (result != 0) {
             delete pThreadData;
@@ -372,7 +372,7 @@ class Thread {
         ThreadDataStatic5<A1, A2, A3, A4, A5>* pThreadData =
             new ThreadDataStatic5<A1, A2, A3, A4, A5>(pFunction, a1, a2, a3, a4,
                                                       a5);
-        int result = pthread_create(
+        int result = ::pthread_create(
             &_id, _attr, &startThreadStatic5<A1, A2, A3, A4, A5>, pThreadData);
         if (result != 0) {
             delete pThreadData;
@@ -432,9 +432,9 @@ class Thread {
         ThreadDataStatic6<A1, A2, A3, A4, A5, A6>* pThreadData =
             new ThreadDataStatic6<A1, A2, A3, A4, A5, A6>(pFunction, a1, a2, a3,
                                                           a4, a5, a6);
-        int result = pthread_create(&_id, _attr,
-                                    &startThreadStatic6<A1, A2, A3, A4, A5, A6>,
-                                    pThreadData);
+        int result = ::pthread_create(
+            &_id, _attr, &startThreadStatic6<A1, A2, A3, A4, A5, A6>,
+            pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -497,7 +497,7 @@ class Thread {
         ThreadDataStatic7<A1, A2, A3, A4, A5, A6, A7>* pThreadData =
             new ThreadDataStatic7<A1, A2, A3, A4, A5, A6, A7>(
                 pFunction, a1, a2, a3, a4, a5, a6, a7);
-        int result = pthread_create(
+        int result = ::pthread_create(
             &_id, _attr, &startThreadStatic7<A1, A2, A3, A4, A5, A6, A7>,
             pThreadData);
         if (result != 0) {
@@ -565,7 +565,7 @@ class Thread {
         ThreadDataStatic8<A1, A2, A3, A4, A5, A6, A7, A8>* pThreadData =
             new ThreadDataStatic8<A1, A2, A3, A4, A5, A6, A7, A8>(
                 pFunction, a1, a2, a3, a4, a5, a6, a7, a8);
-        int result = pthread_create(
+        int result = ::pthread_create(
             &_id, _attr, &startThreadStatic8<A1, A2, A3, A4, A5, A6, A7, A8>,
             pThreadData);
         if (result != 0) {
@@ -636,7 +636,7 @@ class Thread {
         ThreadDataStatic9<A1, A2, A3, A4, A5, A6, A7, A8, A9>* pThreadData =
             new ThreadDataStatic9<A1, A2, A3, A4, A5, A6, A7, A8, A9>(
                 pFunction, a1, a2, a3, a4, a5, a6, a7, a8, a9);
-        int result = pthread_create(
+        int result = ::pthread_create(
             &_id, _attr,
             &startThreadStatic9<A1, A2, A3, A4, A5, A6, A7, A8, A9>,
             pThreadData);
@@ -712,7 +712,7 @@ class Thread {
             pThreadData =
                 new ThreadDataStatic10<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>(
                     pFunction, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
-        int result = pthread_create(
+        int result = ::pthread_create(
             &_id, _attr,
             &startThreadStatic10<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>,
             pThreadData);
@@ -785,8 +785,8 @@ class Thread {
         }
         ThreadDataMethod0<Class>* pThreadData =
             new ThreadDataMethod0<Class>(pFunction, pObject);
-        int result = pthread_create(&_id, _attr, &startThreadMethod0<Class>,
-                                    pThreadData);
+        int result = ::pthread_create(&_id, _attr, &startThreadMethod0<Class>,
+                                      pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -831,8 +831,8 @@ class Thread {
         }
         ThreadDataMethod1<Class, A1>* pThreadData =
             new ThreadDataMethod1<Class, A1>(pFunction, pObject, a1);
-        int result = pthread_create(&_id, _attr, &startThreadMethod1<Class, A1>,
-                                    pThreadData);
+        int result = ::pthread_create(
+            &_id, _attr, &startThreadMethod1<Class, A1>, pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -879,7 +879,7 @@ class Thread {
         }
         ThreadDataMethod2<Class, A1, A2>* pThreadData =
             new ThreadDataMethod2<Class, A1, A2>(pFunction, pObject, a1, a2);
-        int result = pthread_create(
+        int result = ::pthread_create(
             &_id, _attr, &startThreadMethod2<Class, A1, A2>, pThreadData);
         if (result != 0) {
             delete pThreadData;
@@ -933,7 +933,7 @@ class Thread {
         ThreadDataMethod3<Class, A1, A2, A3>* pThreadData =
             new ThreadDataMethod3<Class, A1, A2, A3>(pFunction, pObject, a1, a2,
                                                      a3);
-        int result = pthread_create(
+        int result = ::pthread_create(
             &_id, _attr, &startThreadMethod3<Class, A1, A2, A3>, pThreadData);
         if (result != 0) {
             delete pThreadData;
@@ -989,9 +989,9 @@ class Thread {
         ThreadDataMethod4<Class, A1, A2, A3, A4>* pThreadData =
             new ThreadDataMethod4<Class, A1, A2, A3, A4>(pFunction, pObject, a1,
                                                          a2, a3, a4);
-        int result = pthread_create(&_id, _attr,
-                                    &startThreadMethod4<Class, A1, A2, A3, A4>,
-                                    pThreadData);
+        int result = ::pthread_create(
+            &_id, _attr, &startThreadMethod4<Class, A1, A2, A3, A4>,
+            pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -1050,7 +1050,7 @@ class Thread {
         ThreadDataMethod5<Class, A1, A2, A3, A4, A5>* pThreadData =
             new ThreadDataMethod5<Class, A1, A2, A3, A4, A5>(
                 pFunction, pObject, a1, a2, a3, a4, a5);
-        int result = pthread_create(
+        int result = ::pthread_create(
             &_id, _attr, &startThreadMethod5<Class, A1, A2, A3, A4, A5>,
             pThreadData);
         if (result != 0) {
@@ -1116,7 +1116,7 @@ class Thread {
         ThreadDataMethod6<Class, A1, A2, A3, A4, A5, A6>* pThreadData =
             new ThreadDataMethod6<Class, A1, A2, A3, A4, A5, A6>(
                 pFunction, pObject, a1, a2, a3, a4, a5, a6);
-        int result = pthread_create(
+        int result = ::pthread_create(
             &_id, _attr, &startThreadMethod6<Class, A1, A2, A3, A4, A5, A6>,
             pThreadData);
         if (result != 0) {
@@ -1186,7 +1186,7 @@ class Thread {
         ThreadDataMethod7<Class, A1, A2, A3, A4, A5, A6, A7>* pThreadData =
             new ThreadDataMethod7<Class, A1, A2, A3, A4, A5, A6, A7>(
                 pFunction, pObject, a1, a2, a3, a4, a5, a6, a7);
-        int result = pthread_create(
+        int result = ::pthread_create(
             &_id, _attr, &startThreadMethod7<Class, A1, A2, A3, A4, A5, A6, A7>,
             pThreadData);
         if (result != 0) {
@@ -1259,7 +1259,7 @@ class Thread {
         ThreadDataMethod8<Class, A1, A2, A3, A4, A5, A6, A7, A8>* pThreadData =
             new ThreadDataMethod8<Class, A1, A2, A3, A4, A5, A6, A7, A8>(
                 pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8);
-        int result = pthread_create(
+        int result = ::pthread_create(
             &_id, _attr,
             &startThreadMethod8<Class, A1, A2, A3, A4, A5, A6, A7, A8>,
             pThreadData);
@@ -1338,7 +1338,7 @@ class Thread {
                           A9>* pThreadData =
             new ThreadDataMethod9<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9>(
                 pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8, a9);
-        int result = pthread_create(
+        int result = ::pthread_create(
             &_id, _attr,
             &startThreadMethod9<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9>,
             pThreadData);
@@ -1424,10 +1424,10 @@ class Thread {
                                                  A7, A8, A9, A10>(
                 pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
         int result =
-            pthread_create(&_id, _attr,
-                           &startThreadMethod10<Class, A1, A2, A3, A4, A5, A6,
-                                                A7, A8, A9, A10>,
-                           pThreadData);
+            ::pthread_create(&_id, _attr,
+                             &startThreadMethod10<Class, A1, A2, A3, A4, A5, A6,
+                                                  A7, A8, A9, A10>,
+                             pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -1502,7 +1502,7 @@ class Thread {
         }
         ThreadDataMethodConst0<Class>* pThreadData =
             new ThreadDataMethodConst0<Class>(pFunction, pObject);
-        int result = pthread_create(
+        int result = ::pthread_create(
             &_id, _attr, &startThreadMethodConst0<Class>, pThreadData);
         if (result != 0) {
             delete pThreadData;
@@ -1550,7 +1550,7 @@ class Thread {
         }
         ThreadDataMethodConst1<Class, A1>* pThreadData =
             new ThreadDataMethodConst1<Class, A1>(pFunction, pObject, a1);
-        int result = pthread_create(
+        int result = ::pthread_create(
             &_id, _attr, &startThreadMethodConst1<Class, A1>, pThreadData);
         if (result != 0) {
             delete pThreadData;
@@ -1602,7 +1602,7 @@ class Thread {
         ThreadDataMethodConst2<Class, A1, A2>* pThreadData =
             new ThreadDataMethodConst2<Class, A1, A2>(pFunction, pObject, a1,
                                                       a2);
-        int result = pthread_create(
+        int result = ::pthread_create(
             &_id, _attr, &startThreadMethodConst2<Class, A1, A2>, pThreadData);
         if (result != 0) {
             delete pThreadData;
@@ -1656,9 +1656,9 @@ class Thread {
         ThreadDataMethodConst3<Class, A1, A2, A3>* pThreadData =
             new ThreadDataMethodConst3<Class, A1, A2, A3>(pFunction, pObject,
                                                           a1, a2, a3);
-        int result = pthread_create(&_id, _attr,
-                                    &startThreadMethodConst3<Class, A1, A2, A3>,
-                                    pThreadData);
+        int result = ::pthread_create(
+            &_id, _attr, &startThreadMethodConst3<Class, A1, A2, A3>,
+            pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");
@@ -1713,7 +1713,7 @@ class Thread {
         ThreadDataMethodConst4<Class, A1, A2, A3, A4>* pThreadData =
             new ThreadDataMethodConst4<Class, A1, A2, A3, A4>(
                 pFunction, pObject, a1, a2, a3, a4);
-        int result = pthread_create(
+        int result = ::pthread_create(
             &_id, _attr, &startThreadMethodConst4<Class, A1, A2, A3, A4>,
             pThreadData);
         if (result != 0) {
@@ -1776,7 +1776,7 @@ class Thread {
         ThreadDataMethodConst5<Class, A1, A2, A3, A4, A5>* pThreadData =
             new ThreadDataMethodConst5<Class, A1, A2, A3, A4, A5>(
                 pFunction, pObject, a1, a2, a3, a4, a5);
-        int result = pthread_create(
+        int result = ::pthread_create(
             &_id, _attr, &startThreadMethodConst5<Class, A1, A2, A3, A4, A5>,
             pThreadData);
         if (result != 0) {
@@ -1844,7 +1844,7 @@ class Thread {
         ThreadDataMethodConst6<Class, A1, A2, A3, A4, A5, A6>* pThreadData =
             new ThreadDataMethodConst6<Class, A1, A2, A3, A4, A5, A6>(
                 pFunction, pObject, a1, a2, a3, a4, a5, a6);
-        int result = pthread_create(
+        int result = ::pthread_create(
             &_id, _attr,
             &startThreadMethodConst6<Class, A1, A2, A3, A4, A5, A6>,
             pThreadData);
@@ -1917,7 +1917,7 @@ class Thread {
         ThreadDataMethodConst7<Class, A1, A2, A3, A4, A5, A6, A7>* pThreadData =
             new ThreadDataMethodConst7<Class, A1, A2, A3, A4, A5, A6, A7>(
                 pFunction, pObject, a1, a2, a3, a4, a5, a6, a7);
-        int result = pthread_create(
+        int result = ::pthread_create(
             &_id, _attr,
             &startThreadMethodConst7<Class, A1, A2, A3, A4, A5, A6, A7>,
             pThreadData);
@@ -1994,7 +1994,7 @@ class Thread {
                                A8>* pThreadData =
             new ThreadDataMethodConst8<Class, A1, A2, A3, A4, A5, A6, A7, A8>(
                 pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8);
-        int result = pthread_create(
+        int result = ::pthread_create(
             &_id, _attr,
             &startThreadMethodConst8<Class, A1, A2, A3, A4, A5, A6, A7, A8>,
             pThreadData);
@@ -2074,7 +2074,7 @@ class Thread {
             pThreadData = new ThreadDataMethodConst9<Class, A1, A2, A3, A4, A5,
                                                      A6, A7, A8, A9>(
                 pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8, a9);
-        int result = pthread_create(
+        int result = ::pthread_create(
             &_id, _attr,
             &startThreadMethodConst9<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9>,
             pThreadData);
@@ -2161,10 +2161,10 @@ class Thread {
                                                       A6, A7, A8, A9, A10>(
                 pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
         int result =
-            pthread_create(&_id, _attr,
-                           &startThreadMethodConst10<Class, A1, A2, A3, A4, A5,
-                                                     A6, A7, A8, A9, A10>,
-                           pThreadData);
+            ::pthread_create(&_id, _attr,
+                             &startThreadMethodConst10<Class, A1, A2, A3, A4,
+                                                       A5, A6, A7, A8, A9, A10>,
+                             pThreadData);
         if (result != 0) {
             delete pThreadData;
             throw Exception(_id, "Failed to create thread");

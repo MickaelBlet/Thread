@@ -68,6 +68,7 @@ GTEST_TEST(thread, staticMethodVoid) {
     EXPECT_TRUE(MyTest::resultStaticMethodVoid);
     MyTest::resultStaticMethodVoid = false;
     thrd.start(&MyTest::staticMethodVoid);
+    EXPECT_TRUE(thrd.joinable());
     thrd.join();
     EXPECT_TRUE(MyTest::resultStaticMethodVoid);
 }
