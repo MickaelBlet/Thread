@@ -34,83 +34,83 @@ namespace blet {
 
 class Thread {
   private:
-    ::pthread_t _id;
-    bool _isDetached;
-    ::pthread_attr_t* _attr;
+    ::pthread_t id_;
+    bool isDetached_;
+    ::pthread_attr_t* attr_;
 
   public:
     class Exception : public std::exception {
       public:
         Exception(const pthread_t& id, const char* message) :
             std::exception(),
-            _what(message),
-            _id(id) {}
+            what_(message),
+            id_(id) {}
         virtual ~Exception() throw() {}
         const char* what() const throw() {
-            return _what;
+            return what_;
         }
 
       protected:
-        const char* _what;
-        ::pthread_t _id;
+        const char* what_;
+        ::pthread_t id_;
     };
 
     Thread() :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {}
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {}
 
     virtual ~Thread() {
-        if (_id != 0 && !_isDetached) {
-            ::pthread_join(_id, NULL);
+        if (id_ != 0 && !isDetached_) {
+            ::pthread_join(id_, NULL);
         }
     }
 
     void join() {
-        if (_id == 0 || _isDetached) {
-            throw Exception(_id, "Thread is not joinable");
+        if (id_ == 0 || isDetached_) {
+            throw Exception(id_, "Thread is not joinable");
         }
-        ::pthread_join(_id, NULL);
-        _id = 0;
+        ::pthread_join(id_, NULL);
+        id_ = 0;
     }
 
     bool joinable() const {
-        return _id != 0 && !_isDetached;
+        return id_ != 0 && !isDetached_;
     }
 
     void cancel() {
-        if (_id == 0 || _isDetached) {
-            throw Exception(_id, "Thread is not cancelable");
+        if (id_ == 0 || isDetached_) {
+            throw Exception(id_, "Thread is not cancelable");
         }
 
-        int result = ::pthread_cancel(_id);
+        int result = ::pthread_cancel(id_);
         if (result != 0) {
-            throw Exception(_id, "Failed to cancel thread");
+            throw Exception(id_, "Failed to cancel thread");
         }
     }
 
     void detach() {
-        if (_id == 0 || _isDetached) {
-            throw Exception(_id, "Thread is not detachable");
+        if (id_ == 0 || isDetached_) {
+            throw Exception(id_, "Thread is not detachable");
         }
 
-        int result = ::pthread_detach(_id);
+        int result = ::pthread_detach(id_);
         if (result != 0) {
-            throw Exception(_id, "Failed to detach thread");
+            throw Exception(id_, "Failed to detach thread");
         }
-        _isDetached = true;
+        isDetached_ = true;
     }
 
     const pthread_t& get_id() const {
-        return _id;
+        return id_;
     }
 
     const pthread_t& native_handle() const {
-        return _id;
+        return id_;
     }
 
     void set_attr(pthread_attr_t* attr) {
-        _attr = attr;
+        attr_ = attr;
     }
 
     // -------------------------------------------------------------------------
@@ -119,33 +119,33 @@ class Thread {
 
   public:
     Thread(void (*pFunction)()) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction);
     }
 
     void start(void (*pFunction)()) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataStatic0* pThreadData = new ThreadDataStatic0(pFunction);
         int result =
-            ::pthread_create(&_id, _attr, &startThreadStatic0, pThreadData);
+            ::pthread_create(&id_, attr_, &startThreadStatic0, pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
   private:
     struct ThreadDataStatic0 {
         ThreadDataStatic0(void (*pFunction)()) :
-            _pFunction(pFunction) {}
+            pFunction_(pFunction) {}
         void call() {
-            (*_pFunction)();
+            (*pFunction_)();
         }
-        void (*_pFunction)();
+        void (*pFunction_)();
     };
 
     static void* startThreadStatic0(void* data) {
@@ -159,24 +159,24 @@ class Thread {
   public:
     template<typename A1>
     Thread(void (*pFunction)(A1), A1 a1) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, a1);
     }
 
     template<typename A1>
     void start(void (*pFunction)(A1), A1 a1) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataStatic1<A1>* pThreadData =
             new ThreadDataStatic1<A1>(pFunction, a1);
         int result =
-            ::pthread_create(&_id, _attr, &startThreadStatic1<A1>, pThreadData);
+            ::pthread_create(&id_, attr_, &startThreadStatic1<A1>, pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -184,13 +184,13 @@ class Thread {
     template<typename A1>
     struct ThreadDataStatic1 {
         ThreadDataStatic1(void (*pFunction)(A1), A1 a1) :
-            _pFunction(pFunction),
-            _a1(a1) {}
+            pFunction_(pFunction),
+            a1_(a1) {}
         void call() {
-            (*_pFunction)(_a1);
+            (*pFunction_)(a1_);
         }
-        void (*_pFunction)(A1);
-        A1 _a1;
+        void (*pFunction_)(A1);
+        A1 a1_;
     };
 
     template<typename A1>
@@ -205,24 +205,24 @@ class Thread {
   public:
     template<typename A1, typename A2>
     Thread(void (*pFunction)(A1, A2), A1 a1, A2 a2) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, a1, a2);
     }
 
     template<typename A1, typename A2>
     void start(void (*pFunction)(A1, A2), A1 a1, A2 a2) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataStatic2<A1, A2>* pThreadData =
             new ThreadDataStatic2<A1, A2>(pFunction, a1, a2);
-        int result = ::pthread_create(&_id, _attr, &startThreadStatic2<A1, A2>,
+        int result = ::pthread_create(&id_, attr_, &startThreadStatic2<A1, A2>,
                                       pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -230,15 +230,15 @@ class Thread {
     template<typename A1, typename A2>
     struct ThreadDataStatic2 {
         ThreadDataStatic2(void (*pFunction)(A1, A2), A1 a1, A2 a2) :
-            _pFunction(pFunction),
-            _a1(a1),
-            _a2(a2) {}
+            pFunction_(pFunction),
+            a1_(a1),
+            a2_(a2) {}
         void call() {
-            (*_pFunction)(_a1, _a2);
+            (*pFunction_)(a1_, a2_);
         }
-        void (*_pFunction)(A1, A2);
-        A1 _a1;
-        A2 _a2;
+        void (*pFunction_)(A1, A2);
+        A1 a1_;
+        A2 a2_;
     };
 
     template<typename A1, typename A2>
@@ -253,24 +253,24 @@ class Thread {
   public:
     template<typename A1, typename A2, typename A3>
     Thread(void (*pFunction)(A1, A2, A3), A1 a1, A2 a2, A3 a3) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, a1, a2, a3);
     }
 
     template<typename A1, typename A2, typename A3>
     void start(void (*pFunction)(A1, A2, A3), A1 a1, A2 a2, A3 a3) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataStatic3<A1, A2, A3>* pThreadData =
             new ThreadDataStatic3<A1, A2, A3>(pFunction, a1, a2, a3);
         int result = ::pthread_create(
-            &_id, _attr, &startThreadStatic3<A1, A2, A3>, pThreadData);
+            &id_, attr_, &startThreadStatic3<A1, A2, A3>, pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -278,17 +278,17 @@ class Thread {
     template<typename A1, typename A2, typename A3>
     struct ThreadDataStatic3 {
         ThreadDataStatic3(void (*pFunction)(A1, A2, A3), A1 a1, A2 a2, A3 a3) :
-            _pFunction(pFunction),
-            _a1(a1),
-            _a2(a2),
-            _a3(a3) {}
+            pFunction_(pFunction),
+            a1_(a1),
+            a2_(a2),
+            a3_(a3) {}
         void call() {
-            (*_pFunction)(_a1, _a2, _a3);
+            (*pFunction_)(a1_, a2_, a3_);
         }
-        void (*_pFunction)(A1, A2, A3);
-        A1 _a1;
-        A2 _a2;
-        A3 _a3;
+        void (*pFunction_)(A1, A2, A3);
+        A1 a1_;
+        A2 a2_;
+        A3 a3_;
     };
 
     template<typename A1, typename A2, typename A3>
@@ -303,24 +303,24 @@ class Thread {
   public:
     template<typename A1, typename A2, typename A3, typename A4>
     Thread(void (*pFunction)(A1, A2, A3, A4), A1 a1, A2 a2, A3 a3, A4 a4) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, a1, a2, a3, a4);
     }
 
     template<typename A1, typename A2, typename A3, typename A4>
     void start(void (*pFunction)(A1, A2, A3, A4), A1 a1, A2 a2, A3 a3, A4 a4) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataStatic4<A1, A2, A3, A4>* pThreadData =
             new ThreadDataStatic4<A1, A2, A3, A4>(pFunction, a1, a2, a3, a4);
         int result = ::pthread_create(
-            &_id, _attr, &startThreadStatic4<A1, A2, A3, A4>, pThreadData);
+            &id_, attr_, &startThreadStatic4<A1, A2, A3, A4>, pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -329,19 +329,19 @@ class Thread {
     struct ThreadDataStatic4 {
         ThreadDataStatic4(void (*pFunction)(A1, A2, A3, A4), A1 a1, A2 a2,
                           A3 a3, A4 a4) :
-            _pFunction(pFunction),
-            _a1(a1),
-            _a2(a2),
-            _a3(a3),
-            _a4(a4) {}
+            pFunction_(pFunction),
+            a1_(a1),
+            a2_(a2),
+            a3_(a3),
+            a4_(a4) {}
         void call() {
-            (*_pFunction)(_a1, _a2, _a3, _a4);
+            (*pFunction_)(a1_, a2_, a3_, a4_);
         }
-        void (*_pFunction)(A1, A2, A3, A4);
-        A1 _a1;
-        A2 _a2;
-        A3 _a3;
-        A4 _a4;
+        void (*pFunction_)(A1, A2, A3, A4);
+        A1 a1_;
+        A2 a2_;
+        A3 a3_;
+        A4 a4_;
     };
 
     template<typename A1, typename A2, typename A3, typename A4>
@@ -357,26 +357,26 @@ class Thread {
     template<typename A1, typename A2, typename A3, typename A4, typename A5>
     Thread(void (*pFunction)(A1, A2, A3, A4, A5), A1 a1, A2 a2, A3 a3, A4 a4,
            A5 a5) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, a1, a2, a3, a4, a5);
     }
 
     template<typename A1, typename A2, typename A3, typename A4, typename A5>
     void start(void (*pFunction)(A1, A2, A3, A4, A5), A1 a1, A2 a2, A3 a3,
                A4 a4, A5 a5) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataStatic5<A1, A2, A3, A4, A5>* pThreadData =
             new ThreadDataStatic5<A1, A2, A3, A4, A5>(pFunction, a1, a2, a3, a4,
                                                       a5);
         int result = ::pthread_create(
-            &_id, _attr, &startThreadStatic5<A1, A2, A3, A4, A5>, pThreadData);
+            &id_, attr_, &startThreadStatic5<A1, A2, A3, A4, A5>, pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -385,21 +385,21 @@ class Thread {
     struct ThreadDataStatic5 {
         ThreadDataStatic5(void (*pFunction)(A1, A2, A3, A4, A5), A1 a1, A2 a2,
                           A3 a3, A4 a4, A5 a5) :
-            _pFunction(pFunction),
-            _a1(a1),
-            _a2(a2),
-            _a3(a3),
-            _a4(a4),
-            _a5(a5) {}
+            pFunction_(pFunction),
+            a1_(a1),
+            a2_(a2),
+            a3_(a3),
+            a4_(a4),
+            a5_(a5) {}
         void call() {
-            (*_pFunction)(_a1, _a2, _a3, _a4, _a5);
+            (*pFunction_)(a1_, a2_, a3_, a4_, a5_);
         }
-        void (*_pFunction)(A1, A2, A3, A4, A5);
-        A1 _a1;
-        A2 _a2;
-        A3 _a3;
-        A4 _a4;
-        A5 _a5;
+        void (*pFunction_)(A1, A2, A3, A4, A5);
+        A1 a1_;
+        A2 a2_;
+        A3 a3_;
+        A4 a4_;
+        A5 a5_;
     };
 
     template<typename A1, typename A2, typename A3, typename A4, typename A5>
@@ -416,9 +416,9 @@ class Thread {
              typename A6>
     Thread(void (*pFunction)(A1, A2, A3, A4, A5, A6), A1 a1, A2 a2, A3 a3,
            A4 a4, A5 a5, A6 a6) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, a1, a2, a3, a4, a5, a6);
     }
 
@@ -426,18 +426,18 @@ class Thread {
              typename A6>
     void start(void (*pFunction)(A1, A2, A3, A4, A5, A6), A1 a1, A2 a2, A3 a3,
                A4 a4, A5 a5, A6 a6) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataStatic6<A1, A2, A3, A4, A5, A6>* pThreadData =
             new ThreadDataStatic6<A1, A2, A3, A4, A5, A6>(pFunction, a1, a2, a3,
                                                           a4, a5, a6);
         int result = ::pthread_create(
-            &_id, _attr, &startThreadStatic6<A1, A2, A3, A4, A5, A6>,
+            &id_, attr_, &startThreadStatic6<A1, A2, A3, A4, A5, A6>,
             pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -447,23 +447,23 @@ class Thread {
     struct ThreadDataStatic6 {
         ThreadDataStatic6(void (*pFunction)(A1, A2, A3, A4, A5, A6), A1 a1,
                           A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) :
-            _pFunction(pFunction),
-            _a1(a1),
-            _a2(a2),
-            _a3(a3),
-            _a4(a4),
-            _a5(a5),
-            _a6(a6) {}
+            pFunction_(pFunction),
+            a1_(a1),
+            a2_(a2),
+            a3_(a3),
+            a4_(a4),
+            a5_(a5),
+            a6_(a6) {}
         void call() {
-            (*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6);
+            (*pFunction_)(a1_, a2_, a3_, a4_, a5_, a6_);
         }
-        void (*_pFunction)(A1, A2, A3, A4, A5, A6);
-        A1 _a1;
-        A2 _a2;
-        A3 _a3;
-        A4 _a4;
-        A5 _a5;
-        A6 _a6;
+        void (*pFunction_)(A1, A2, A3, A4, A5, A6);
+        A1 a1_;
+        A2 a2_;
+        A3 a3_;
+        A4 a4_;
+        A5 a5_;
+        A6 a6_;
     };
 
     template<typename A1, typename A2, typename A3, typename A4, typename A5,
@@ -481,9 +481,9 @@ class Thread {
              typename A6, typename A7>
     Thread(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7), A1 a1, A2 a2, A3 a3,
            A4 a4, A5 a5, A6 a6, A7 a7) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, a1, a2, a3, a4, a5, a6, a7);
     }
 
@@ -491,18 +491,18 @@ class Thread {
              typename A6, typename A7>
     void start(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7), A1 a1, A2 a2,
                A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataStatic7<A1, A2, A3, A4, A5, A6, A7>* pThreadData =
             new ThreadDataStatic7<A1, A2, A3, A4, A5, A6, A7>(
                 pFunction, a1, a2, a3, a4, a5, a6, a7);
         int result = ::pthread_create(
-            &_id, _attr, &startThreadStatic7<A1, A2, A3, A4, A5, A6, A7>,
+            &id_, attr_, &startThreadStatic7<A1, A2, A3, A4, A5, A6, A7>,
             pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -512,25 +512,25 @@ class Thread {
     struct ThreadDataStatic7 {
         ThreadDataStatic7(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7), A1 a1,
                           A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) :
-            _pFunction(pFunction),
-            _a1(a1),
-            _a2(a2),
-            _a3(a3),
-            _a4(a4),
-            _a5(a5),
-            _a6(a6),
-            _a7(a7) {}
+            pFunction_(pFunction),
+            a1_(a1),
+            a2_(a2),
+            a3_(a3),
+            a4_(a4),
+            a5_(a5),
+            a6_(a6),
+            a7_(a7) {}
         void call() {
-            (*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6, _a7);
+            (*pFunction_)(a1_, a2_, a3_, a4_, a5_, a6_, a7_);
         }
-        void (*_pFunction)(A1, A2, A3, A4, A5, A6, A7);
-        A1 _a1;
-        A2 _a2;
-        A3 _a3;
-        A4 _a4;
-        A5 _a5;
-        A6 _a6;
-        A7 _a7;
+        void (*pFunction_)(A1, A2, A3, A4, A5, A6, A7);
+        A1 a1_;
+        A2 a2_;
+        A3 a3_;
+        A4 a4_;
+        A5 a5_;
+        A6 a6_;
+        A7 a7_;
     };
 
     template<typename A1, typename A2, typename A3, typename A4, typename A5,
@@ -549,9 +549,9 @@ class Thread {
              typename A6, typename A7, typename A8>
     Thread(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8), A1 a1, A2 a2,
            A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, a1, a2, a3, a4, a5, a6, a7, a8);
     }
 
@@ -559,18 +559,18 @@ class Thread {
              typename A6, typename A7, typename A8>
     void start(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8), A1 a1, A2 a2,
                A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataStatic8<A1, A2, A3, A4, A5, A6, A7, A8>* pThreadData =
             new ThreadDataStatic8<A1, A2, A3, A4, A5, A6, A7, A8>(
                 pFunction, a1, a2, a3, a4, a5, a6, a7, a8);
         int result = ::pthread_create(
-            &_id, _attr, &startThreadStatic8<A1, A2, A3, A4, A5, A6, A7, A8>,
+            &id_, attr_, &startThreadStatic8<A1, A2, A3, A4, A5, A6, A7, A8>,
             pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -581,27 +581,27 @@ class Thread {
         ThreadDataStatic8(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8),
                           A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
                           A8 a8) :
-            _pFunction(pFunction),
-            _a1(a1),
-            _a2(a2),
-            _a3(a3),
-            _a4(a4),
-            _a5(a5),
-            _a6(a6),
-            _a7(a7),
-            _a8(a8) {}
+            pFunction_(pFunction),
+            a1_(a1),
+            a2_(a2),
+            a3_(a3),
+            a4_(a4),
+            a5_(a5),
+            a6_(a6),
+            a7_(a7),
+            a8_(a8) {}
         void call() {
-            (*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6, _a7, _a8);
+            (*pFunction_)(a1_, a2_, a3_, a4_, a5_, a6_, a7_, a8_);
         }
-        void (*_pFunction)(A1, A2, A3, A4, A5, A6, A7, A8);
-        A1 _a1;
-        A2 _a2;
-        A3 _a3;
-        A4 _a4;
-        A5 _a5;
-        A6 _a6;
-        A7 _a7;
-        A8 _a8;
+        void (*pFunction_)(A1, A2, A3, A4, A5, A6, A7, A8);
+        A1 a1_;
+        A2 a2_;
+        A3 a3_;
+        A4 a4_;
+        A5 a5_;
+        A6 a6_;
+        A7 a7_;
+        A8 a8_;
     };
 
     template<typename A1, typename A2, typename A3, typename A4, typename A5,
@@ -620,9 +620,9 @@ class Thread {
              typename A6, typename A7, typename A8, typename A9>
     Thread(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9), A1 a1, A2 a2,
            A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
 
@@ -630,19 +630,19 @@ class Thread {
              typename A6, typename A7, typename A8, typename A9>
     void start(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9), A1 a1,
                A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataStatic9<A1, A2, A3, A4, A5, A6, A7, A8, A9>* pThreadData =
             new ThreadDataStatic9<A1, A2, A3, A4, A5, A6, A7, A8, A9>(
                 pFunction, a1, a2, a3, a4, a5, a6, a7, a8, a9);
         int result = ::pthread_create(
-            &_id, _attr,
+            &id_, attr_,
             &startThreadStatic9<A1, A2, A3, A4, A5, A6, A7, A8, A9>,
             pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -653,29 +653,29 @@ class Thread {
         ThreadDataStatic9(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9),
                           A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
                           A8 a8, A9 a9) :
-            _pFunction(pFunction),
-            _a1(a1),
-            _a2(a2),
-            _a3(a3),
-            _a4(a4),
-            _a5(a5),
-            _a6(a6),
-            _a7(a7),
-            _a8(a8),
-            _a9(a9) {}
+            pFunction_(pFunction),
+            a1_(a1),
+            a2_(a2),
+            a3_(a3),
+            a4_(a4),
+            a5_(a5),
+            a6_(a6),
+            a7_(a7),
+            a8_(a8),
+            a9_(a9) {}
         void call() {
-            (*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6, _a7, _a8, _a9);
+            (*pFunction_)(a1_, a2_, a3_, a4_, a5_, a6_, a7_, a8_, a9_);
         }
-        void (*_pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9);
-        A1 _a1;
-        A2 _a2;
-        A3 _a3;
-        A4 _a4;
-        A5 _a5;
-        A6 _a6;
-        A7 _a7;
-        A8 _a8;
-        A9 _a9;
+        void (*pFunction_)(A1, A2, A3, A4, A5, A6, A7, A8, A9);
+        A1 a1_;
+        A2 a2_;
+        A3 a3_;
+        A4 a4_;
+        A5 a5_;
+        A6 a6_;
+        A7 a7_;
+        A8 a8_;
+        A9 a9_;
     };
 
     template<typename A1, typename A2, typename A3, typename A4, typename A5,
@@ -694,9 +694,9 @@ class Thread {
              typename A6, typename A7, typename A8, typename A9, typename A10>
     Thread(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10), A1 a1,
            A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
     }
 
@@ -705,20 +705,20 @@ class Thread {
     void start(void (*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10),
                A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9,
                A10 a10) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataStatic10<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>*
             pThreadData =
                 new ThreadDataStatic10<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>(
                     pFunction, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
         int result = ::pthread_create(
-            &_id, _attr,
+            &id_, attr_,
             &startThreadStatic10<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>,
             pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -730,31 +730,31 @@ class Thread {
                                              A10),
                            A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
                            A8 a8, A9 a9, A10 a10) :
-            _pFunction(pFunction),
-            _a1(a1),
-            _a2(a2),
-            _a3(a3),
-            _a4(a4),
-            _a5(a5),
-            _a6(a6),
-            _a7(a7),
-            _a8(a8),
-            _a9(a9),
-            _a10(a10) {}
+            pFunction_(pFunction),
+            a1_(a1),
+            a2_(a2),
+            a3_(a3),
+            a4_(a4),
+            a5_(a5),
+            a6_(a6),
+            a7_(a7),
+            a8_(a8),
+            a9_(a9),
+            a10_(a10) {}
         void call() {
-            (*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6, _a7, _a8, _a9, _a10);
+            (*pFunction_)(a1_, a2_, a3_, a4_, a5_, a6_, a7_, a8_, a9_, a10_);
         }
-        void (*_pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10);
-        A1 _a1;
-        A2 _a2;
-        A3 _a3;
-        A4 _a4;
-        A5 _a5;
-        A6 _a6;
-        A7 _a7;
-        A8 _a8;
-        A9 _a9;
-        A10 _a10;
+        void (*pFunction_)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10);
+        A1 a1_;
+        A2 a2_;
+        A3 a3_;
+        A4 a4_;
+        A5 a5_;
+        A6 a6_;
+        A7 a7_;
+        A8 a8_;
+        A9 a9_;
+        A10 a10_;
     };
 
     template<typename A1, typename A2, typename A3, typename A4, typename A5,
@@ -772,24 +772,24 @@ class Thread {
   public:
     template<typename Class>
     Thread(void (Class::*pFunction)(), Class* pObject) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, pObject);
     }
 
     template<typename Class>
     void start(void (Class::*pFunction)(), Class* pObject) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataMethod0<Class>* pThreadData =
             new ThreadDataMethod0<Class>(pFunction, pObject);
-        int result = ::pthread_create(&_id, _attr, &startThreadMethod0<Class>,
+        int result = ::pthread_create(&id_, attr_, &startThreadMethod0<Class>,
                                       pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -797,13 +797,13 @@ class Thread {
     template<typename Class>
     struct ThreadDataMethod0 {
         ThreadDataMethod0(void (Class::*pFunction)(), Class* pObject) :
-            _pFunction(pFunction),
-            _pObject(pObject) {}
+            pFunction_(pFunction),
+            pObject_(pObject) {}
         void call() {
-            (_pObject->*_pFunction)();
+            (pObject_->*pFunction_)();
         }
-        void (Class::*_pFunction)();
-        Class* _pObject;
+        void (Class::*pFunction_)();
+        Class* pObject_;
     };
 
     template<typename Class>
@@ -818,24 +818,24 @@ class Thread {
   public:
     template<typename Class, typename A1>
     Thread(void (Class::*pFunction)(A1), Class* pObject, A1 a1) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, pObject, a1);
     }
 
     template<typename Class, typename A1>
     void start(void (Class::*pFunction)(A1), Class* pObject, A1 a1) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataMethod1<Class, A1>* pThreadData =
             new ThreadDataMethod1<Class, A1>(pFunction, pObject, a1);
         int result = ::pthread_create(
-            &_id, _attr, &startThreadMethod1<Class, A1>, pThreadData);
+            &id_, attr_, &startThreadMethod1<Class, A1>, pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -843,15 +843,15 @@ class Thread {
     template<typename Class, typename A1>
     struct ThreadDataMethod1 {
         ThreadDataMethod1(void (Class::*pFunction)(A1), Class* pObject, A1 a1) :
-            _pFunction(pFunction),
-            _pObject(pObject),
-            _a1(a1) {}
+            pFunction_(pFunction),
+            pObject_(pObject),
+            a1_(a1) {}
         void call() {
-            (_pObject->*_pFunction)(_a1);
+            (pObject_->*pFunction_)(a1_);
         }
-        void (Class::*_pFunction)(A1);
-        Class* _pObject;
-        A1 _a1;
+        void (Class::*pFunction_)(A1);
+        Class* pObject_;
+        A1 a1_;
     };
 
     template<typename Class, typename A1>
@@ -866,24 +866,24 @@ class Thread {
   public:
     template<typename Class, typename A1, typename A2>
     Thread(void (Class::*pFunction)(A1, A2), Class* pObject, A1 a1, A2 a2) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, pObject, a1, a2);
     }
 
     template<typename Class, typename A1, typename A2>
     void start(void (Class::*pFunction)(A1, A2), Class* pObject, A1 a1, A2 a2) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataMethod2<Class, A1, A2>* pThreadData =
             new ThreadDataMethod2<Class, A1, A2>(pFunction, pObject, a1, a2);
         int result = ::pthread_create(
-            &_id, _attr, &startThreadMethod2<Class, A1, A2>, pThreadData);
+            &id_, attr_, &startThreadMethod2<Class, A1, A2>, pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -892,17 +892,17 @@ class Thread {
     struct ThreadDataMethod2 {
         ThreadDataMethod2(void (Class::*pFunction)(A1, A2), Class* pObject,
                           A1 a1, A2 a2) :
-            _pFunction(pFunction),
-            _pObject(pObject),
-            _a1(a1),
-            _a2(a2) {}
+            pFunction_(pFunction),
+            pObject_(pObject),
+            a1_(a1),
+            a2_(a2) {}
         void call() {
-            (_pObject->*_pFunction)(_a1, _a2);
+            (pObject_->*pFunction_)(a1_, a2_);
         }
-        void (Class::*_pFunction)(A1, A2);
-        Class* _pObject;
-        A1 _a1;
-        A2 _a2;
+        void (Class::*pFunction_)(A1, A2);
+        Class* pObject_;
+        A1 a1_;
+        A2 a2_;
     };
 
     template<typename Class, typename A1, typename A2>
@@ -918,26 +918,26 @@ class Thread {
     template<typename Class, typename A1, typename A2, typename A3>
     Thread(void (Class::*pFunction)(A1, A2, A3), Class* pObject, A1 a1, A2 a2,
            A3 a3) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, pObject, a1, a2, a3);
     }
 
     template<typename Class, typename A1, typename A2, typename A3>
     void start(void (Class::*pFunction)(A1, A2, A3), Class* pObject, A1 a1,
                A2 a2, A3 a3) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataMethod3<Class, A1, A2, A3>* pThreadData =
             new ThreadDataMethod3<Class, A1, A2, A3>(pFunction, pObject, a1, a2,
                                                      a3);
         int result = ::pthread_create(
-            &_id, _attr, &startThreadMethod3<Class, A1, A2, A3>, pThreadData);
+            &id_, attr_, &startThreadMethod3<Class, A1, A2, A3>, pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -946,19 +946,19 @@ class Thread {
     struct ThreadDataMethod3 {
         ThreadDataMethod3(void (Class::*pFunction)(A1, A2, A3), Class* pObject,
                           A1 a1, A2 a2, A3 a3) :
-            _pFunction(pFunction),
-            _pObject(pObject),
-            _a1(a1),
-            _a2(a2),
-            _a3(a3) {}
+            pFunction_(pFunction),
+            pObject_(pObject),
+            a1_(a1),
+            a2_(a2),
+            a3_(a3) {}
         void call() {
-            (_pObject->*_pFunction)(_a1, _a2, _a3);
+            (pObject_->*pFunction_)(a1_, a2_, a3_);
         }
-        void (Class::*_pFunction)(A1, A2, A3);
-        Class* _pObject;
-        A1 _a1;
-        A2 _a2;
-        A3 _a3;
+        void (Class::*pFunction_)(A1, A2, A3);
+        Class* pObject_;
+        A1 a1_;
+        A2 a2_;
+        A3 a3_;
     };
 
     template<typename Class, typename A1, typename A2, typename A3>
@@ -974,27 +974,27 @@ class Thread {
     template<typename Class, typename A1, typename A2, typename A3, typename A4>
     Thread(void (Class::*pFunction)(A1, A2, A3, A4), Class* pObject, A1 a1,
            A2 a2, A3 a3, A4 a4) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4);
     }
 
     template<typename Class, typename A1, typename A2, typename A3, typename A4>
     void start(void (Class::*pFunction)(A1, A2, A3, A4), Class* pObject, A1 a1,
                A2 a2, A3 a3, A4 a4) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataMethod4<Class, A1, A2, A3, A4>* pThreadData =
             new ThreadDataMethod4<Class, A1, A2, A3, A4>(pFunction, pObject, a1,
                                                          a2, a3, a4);
         int result = ::pthread_create(
-            &_id, _attr, &startThreadMethod4<Class, A1, A2, A3, A4>,
+            &id_, attr_, &startThreadMethod4<Class, A1, A2, A3, A4>,
             pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -1003,21 +1003,21 @@ class Thread {
     struct ThreadDataMethod4 {
         ThreadDataMethod4(void (Class::*pFunction)(A1, A2, A3, A4),
                           Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4) :
-            _pFunction(pFunction),
-            _pObject(pObject),
-            _a1(a1),
-            _a2(a2),
-            _a3(a3),
-            _a4(a4) {}
+            pFunction_(pFunction),
+            pObject_(pObject),
+            a1_(a1),
+            a2_(a2),
+            a3_(a3),
+            a4_(a4) {}
         void call() {
-            (_pObject->*_pFunction)(_a1, _a2, _a3, _a4);
+            (pObject_->*pFunction_)(a1_, a2_, a3_, a4_);
         }
-        void (Class::*_pFunction)(A1, A2, A3, A4);
-        Class* _pObject;
-        A1 _a1;
-        A2 _a2;
-        A3 _a3;
-        A4 _a4;
+        void (Class::*pFunction_)(A1, A2, A3, A4);
+        Class* pObject_;
+        A1 a1_;
+        A2 a2_;
+        A3 a3_;
+        A4 a4_;
     };
 
     template<typename Class, typename A1, typename A2, typename A3, typename A4>
@@ -1034,9 +1034,9 @@ class Thread {
              typename A5>
     Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5), Class* pObject, A1 a1,
            A2 a2, A3 a3, A4 a4, A5 a5) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4, a5);
     }
 
@@ -1044,18 +1044,18 @@ class Thread {
              typename A5>
     void start(void (Class::*pFunction)(A1, A2, A3, A4, A5), Class* pObject,
                A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataMethod5<Class, A1, A2, A3, A4, A5>* pThreadData =
             new ThreadDataMethod5<Class, A1, A2, A3, A4, A5>(
                 pFunction, pObject, a1, a2, a3, a4, a5);
         int result = ::pthread_create(
-            &_id, _attr, &startThreadMethod5<Class, A1, A2, A3, A4, A5>,
+            &id_, attr_, &startThreadMethod5<Class, A1, A2, A3, A4, A5>,
             pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -1065,23 +1065,23 @@ class Thread {
     struct ThreadDataMethod5 {
         ThreadDataMethod5(void (Class::*pFunction)(A1, A2, A3, A4, A5),
                           Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) :
-            _pFunction(pFunction),
-            _pObject(pObject),
-            _a1(a1),
-            _a2(a2),
-            _a3(a3),
-            _a4(a4),
-            _a5(a5) {}
+            pFunction_(pFunction),
+            pObject_(pObject),
+            a1_(a1),
+            a2_(a2),
+            a3_(a3),
+            a4_(a4),
+            a5_(a5) {}
         void call() {
-            (_pObject->*_pFunction)(_a1, _a2, _a3, _a4, _a5);
+            (pObject_->*pFunction_)(a1_, a2_, a3_, a4_, a5_);
         }
-        void (Class::*_pFunction)(A1, A2, A3, A4, A5);
-        Class* _pObject;
-        A1 _a1;
-        A2 _a2;
-        A3 _a3;
-        A4 _a4;
-        A5 _a5;
+        void (Class::*pFunction_)(A1, A2, A3, A4, A5);
+        Class* pObject_;
+        A1 a1_;
+        A2 a2_;
+        A3 a3_;
+        A4 a4_;
+        A5 a5_;
     };
 
     template<typename Class, typename A1, typename A2, typename A3, typename A4,
@@ -1100,9 +1100,9 @@ class Thread {
              typename A5, typename A6>
     Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6), Class* pObject,
            A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4, a5, a6);
     }
 
@@ -1110,18 +1110,18 @@ class Thread {
              typename A5, typename A6>
     void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6), Class* pObject,
                A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataMethod6<Class, A1, A2, A3, A4, A5, A6>* pThreadData =
             new ThreadDataMethod6<Class, A1, A2, A3, A4, A5, A6>(
                 pFunction, pObject, a1, a2, a3, a4, a5, a6);
         int result = ::pthread_create(
-            &_id, _attr, &startThreadMethod6<Class, A1, A2, A3, A4, A5, A6>,
+            &id_, attr_, &startThreadMethod6<Class, A1, A2, A3, A4, A5, A6>,
             pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -1132,25 +1132,25 @@ class Thread {
         ThreadDataMethod6(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6),
                           Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5,
                           A6 a6) :
-            _pFunction(pFunction),
-            _pObject(pObject),
-            _a1(a1),
-            _a2(a2),
-            _a3(a3),
-            _a4(a4),
-            _a5(a5),
-            _a6(a6) {}
+            pFunction_(pFunction),
+            pObject_(pObject),
+            a1_(a1),
+            a2_(a2),
+            a3_(a3),
+            a4_(a4),
+            a5_(a5),
+            a6_(a6) {}
         void call() {
-            (_pObject->*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6);
+            (pObject_->*pFunction_)(a1_, a2_, a3_, a4_, a5_, a6_);
         }
-        void (Class::*_pFunction)(A1, A2, A3, A4, A5, A6);
-        Class* _pObject;
-        A1 _a1;
-        A2 _a2;
-        A3 _a3;
-        A4 _a4;
-        A5 _a5;
-        A6 _a6;
+        void (Class::*pFunction_)(A1, A2, A3, A4, A5, A6);
+        Class* pObject_;
+        A1 a1_;
+        A2 a2_;
+        A3 a3_;
+        A4 a4_;
+        A5 a5_;
+        A6 a6_;
     };
 
     template<typename Class, typename A1, typename A2, typename A3, typename A4,
@@ -1169,9 +1169,9 @@ class Thread {
              typename A5, typename A6, typename A7>
     Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7), Class* pObject,
            A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4, a5, a6, a7);
     }
 
@@ -1180,18 +1180,18 @@ class Thread {
     void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7),
                Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
                A7 a7) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataMethod7<Class, A1, A2, A3, A4, A5, A6, A7>* pThreadData =
             new ThreadDataMethod7<Class, A1, A2, A3, A4, A5, A6, A7>(
                 pFunction, pObject, a1, a2, a3, a4, a5, a6, a7);
         int result = ::pthread_create(
-            &_id, _attr, &startThreadMethod7<Class, A1, A2, A3, A4, A5, A6, A7>,
+            &id_, attr_, &startThreadMethod7<Class, A1, A2, A3, A4, A5, A6, A7>,
             pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -1202,27 +1202,27 @@ class Thread {
         ThreadDataMethod7(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7),
                           Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5,
                           A6 a6, A7 a7) :
-            _pFunction(pFunction),
-            _pObject(pObject),
-            _a1(a1),
-            _a2(a2),
-            _a3(a3),
-            _a4(a4),
-            _a5(a5),
-            _a6(a6),
-            _a7(a7) {}
+            pFunction_(pFunction),
+            pObject_(pObject),
+            a1_(a1),
+            a2_(a2),
+            a3_(a3),
+            a4_(a4),
+            a5_(a5),
+            a6_(a6),
+            a7_(a7) {}
         void call() {
-            (_pObject->*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6, _a7);
+            (pObject_->*pFunction_)(a1_, a2_, a3_, a4_, a5_, a6_, a7_);
         }
-        void (Class::*_pFunction)(A1, A2, A3, A4, A5, A6, A7);
-        Class* _pObject;
-        A1 _a1;
-        A2 _a2;
-        A3 _a3;
-        A4 _a4;
-        A5 _a5;
-        A6 _a6;
-        A7 _a7;
+        void (Class::*pFunction_)(A1, A2, A3, A4, A5, A6, A7);
+        Class* pObject_;
+        A1 a1_;
+        A2 a2_;
+        A3 a3_;
+        A4 a4_;
+        A5 a5_;
+        A6 a6_;
+        A7 a7_;
     };
 
     template<typename Class, typename A1, typename A2, typename A3, typename A4,
@@ -1242,9 +1242,9 @@ class Thread {
     Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8),
            Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
            A8 a8) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8);
     }
 
@@ -1253,19 +1253,19 @@ class Thread {
     void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8),
                Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
                A8 a8) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataMethod8<Class, A1, A2, A3, A4, A5, A6, A7, A8>* pThreadData =
             new ThreadDataMethod8<Class, A1, A2, A3, A4, A5, A6, A7, A8>(
                 pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8);
         int result = ::pthread_create(
-            &_id, _attr,
+            &id_, attr_,
             &startThreadMethod8<Class, A1, A2, A3, A4, A5, A6, A7, A8>,
             pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -1277,29 +1277,29 @@ class Thread {
                                                    A8),
                           Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5,
                           A6 a6, A7 a7, A8 a8) :
-            _pFunction(pFunction),
-            _pObject(pObject),
-            _a1(a1),
-            _a2(a2),
-            _a3(a3),
-            _a4(a4),
-            _a5(a5),
-            _a6(a6),
-            _a7(a7),
-            _a8(a8) {}
+            pFunction_(pFunction),
+            pObject_(pObject),
+            a1_(a1),
+            a2_(a2),
+            a3_(a3),
+            a4_(a4),
+            a5_(a5),
+            a6_(a6),
+            a7_(a7),
+            a8_(a8) {}
         void call() {
-            (_pObject->*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6, _a7, _a8);
+            (pObject_->*pFunction_)(a1_, a2_, a3_, a4_, a5_, a6_, a7_, a8_);
         }
-        void (Class::*_pFunction)(A1, A2, A3, A4, A5, A6, A7, A8);
-        Class* _pObject;
-        A1 _a1;
-        A2 _a2;
-        A3 _a3;
-        A4 _a4;
-        A5 _a5;
-        A6 _a6;
-        A7 _a7;
-        A8 _a8;
+        void (Class::*pFunction_)(A1, A2, A3, A4, A5, A6, A7, A8);
+        Class* pObject_;
+        A1 a1_;
+        A2 a2_;
+        A3 a3_;
+        A4 a4_;
+        A5 a5_;
+        A6 a6_;
+        A7 a7_;
+        A8 a8_;
     };
 
     template<typename Class, typename A1, typename A2, typename A3, typename A4,
@@ -1320,9 +1320,9 @@ class Thread {
     Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9),
            Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
            A8 a8, A9 a9) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
 
@@ -1331,20 +1331,20 @@ class Thread {
     void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9),
                Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
                A8 a8, A9 a9) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataMethod9<Class, A1, A2, A3, A4, A5, A6, A7, A8,
                           A9>* pThreadData =
             new ThreadDataMethod9<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9>(
                 pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8, a9);
         int result = ::pthread_create(
-            &_id, _attr,
+            &id_, attr_,
             &startThreadMethod9<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9>,
             pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -1356,32 +1356,32 @@ class Thread {
                                                    A8, A9),
                           Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5,
                           A6 a6, A7 a7, A8 a8, A9 a9) :
-            _pFunction(pFunction),
-            _pObject(pObject),
-            _a1(a1),
-            _a2(a2),
-            _a3(a3),
-            _a4(a4),
-            _a5(a5),
-            _a6(a6),
-            _a7(a7),
-            _a8(a8),
-            _a9(a9) {}
+            pFunction_(pFunction),
+            pObject_(pObject),
+            a1_(a1),
+            a2_(a2),
+            a3_(a3),
+            a4_(a4),
+            a5_(a5),
+            a6_(a6),
+            a7_(a7),
+            a8_(a8),
+            a9_(a9) {}
         void call() {
-            (_pObject->*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6, _a7, _a8,
-                                    _a9);
+            (pObject_->*pFunction_)(a1_, a2_, a3_, a4_, a5_, a6_, a7_, a8_,
+                                    a9_);
         }
-        void (Class::*_pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9);
-        Class* _pObject;
-        A1 _a1;
-        A2 _a2;
-        A3 _a3;
-        A4 _a4;
-        A5 _a5;
-        A6 _a6;
-        A7 _a7;
-        A8 _a8;
-        A9 _a9;
+        void (Class::*pFunction_)(A1, A2, A3, A4, A5, A6, A7, A8, A9);
+        Class* pObject_;
+        A1 a1_;
+        A2 a2_;
+        A3 a3_;
+        A4 a4_;
+        A5 a5_;
+        A6 a6_;
+        A7 a7_;
+        A8 a8_;
+        A9 a9_;
     };
 
     template<typename Class, typename A1, typename A2, typename A3, typename A4,
@@ -1403,9 +1403,9 @@ class Thread {
     Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10),
            Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
            A8 a8, A9 a9, A10 a10) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
     }
 
@@ -1416,21 +1416,21 @@ class Thread {
                                         A10),
                Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7,
                A8 a8, A9 a9, A10 a10) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataMethod10<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>*
             pThreadData = new ThreadDataMethod10<Class, A1, A2, A3, A4, A5, A6,
                                                  A7, A8, A9, A10>(
                 pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
         int result =
-            ::pthread_create(&_id, _attr,
+            ::pthread_create(&id_, attr_,
                              &startThreadMethod10<Class, A1, A2, A3, A4, A5, A6,
                                                   A7, A8, A9, A10>,
                              pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -1443,34 +1443,34 @@ class Thread {
                                                     A8, A9, A10),
                            Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5,
                            A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) :
-            _pFunction(pFunction),
-            _pObject(pObject),
-            _a1(a1),
-            _a2(a2),
-            _a3(a3),
-            _a4(a4),
-            _a5(a5),
-            _a6(a6),
-            _a7(a7),
-            _a8(a8),
-            _a9(a9),
-            _a10(a10) {}
+            pFunction_(pFunction),
+            pObject_(pObject),
+            a1_(a1),
+            a2_(a2),
+            a3_(a3),
+            a4_(a4),
+            a5_(a5),
+            a6_(a6),
+            a7_(a7),
+            a8_(a8),
+            a9_(a9),
+            a10_(a10) {}
         void call() {
-            (_pObject->*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6, _a7, _a8, _a9,
-                                    _a10);
+            (pObject_->*pFunction_)(a1_, a2_, a3_, a4_, a5_, a6_, a7_, a8_, a9_,
+                                    a10_);
         }
-        void (Class::*_pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10);
-        Class* _pObject;
-        A1 _a1;
-        A2 _a2;
-        A3 _a3;
-        A4 _a4;
-        A5 _a5;
-        A6 _a6;
-        A7 _a7;
-        A8 _a8;
-        A9 _a9;
-        A10 _a10;
+        void (Class::*pFunction_)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10);
+        Class* pObject_;
+        A1 a1_;
+        A2 a2_;
+        A3 a3_;
+        A4 a4_;
+        A5 a5_;
+        A6 a6_;
+        A7 a7_;
+        A8 a8_;
+        A9 a9_;
+        A10 a10_;
     };
 
     template<typename Class, typename A1, typename A2, typename A3, typename A4,
@@ -1489,24 +1489,24 @@ class Thread {
   public:
     template<typename Class>
     Thread(void (Class::*pFunction)() const, const Class* pObject) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, pObject);
     }
 
     template<typename Class>
     void start(void (Class::*pFunction)() const, const Class* pObject) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataMethodConst0<Class>* pThreadData =
             new ThreadDataMethodConst0<Class>(pFunction, pObject);
         int result = ::pthread_create(
-            &_id, _attr, &startThreadMethodConst0<Class>, pThreadData);
+            &id_, attr_, &startThreadMethodConst0<Class>, pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -1515,13 +1515,13 @@ class Thread {
     struct ThreadDataMethodConst0 {
         ThreadDataMethodConst0(void (Class::*pFunction)() const,
                                const Class* pObject) :
-            _pFunction(pFunction),
-            _pObject(pObject) {}
+            pFunction_(pFunction),
+            pObject_(pObject) {}
         void call() {
-            (_pObject->*_pFunction)();
+            (pObject_->*pFunction_)();
         }
-        void (Class::*_pFunction)() const;
-        const Class* _pObject;
+        void (Class::*pFunction_)() const;
+        const Class* pObject_;
     };
 
     template<typename Class>
@@ -1536,25 +1536,25 @@ class Thread {
   public:
     template<typename Class, typename A1>
     Thread(void (Class::*pFunction)(A1) const, const Class* pObject, A1 a1) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, pObject, a1);
     }
 
     template<typename Class, typename A1>
     void start(void (Class::*pFunction)(A1) const, const Class* pObject,
                A1 a1) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataMethodConst1<Class, A1>* pThreadData =
             new ThreadDataMethodConst1<Class, A1>(pFunction, pObject, a1);
         int result = ::pthread_create(
-            &_id, _attr, &startThreadMethodConst1<Class, A1>, pThreadData);
+            &id_, attr_, &startThreadMethodConst1<Class, A1>, pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -1563,15 +1563,15 @@ class Thread {
     struct ThreadDataMethodConst1 {
         ThreadDataMethodConst1(void (Class::*pFunction)(A1) const,
                                const Class* pObject, A1 a1) :
-            _pFunction(pFunction),
-            _pObject(pObject),
-            _a1(a1) {}
+            pFunction_(pFunction),
+            pObject_(pObject),
+            a1_(a1) {}
         void call() {
-            (_pObject->*_pFunction)(_a1);
+            (pObject_->*pFunction_)(a1_);
         }
-        void (Class::*_pFunction)(A1) const;
-        const Class* _pObject;
-        A1 _a1;
+        void (Class::*pFunction_)(A1) const;
+        const Class* pObject_;
+        A1 a1_;
     };
 
     template<typename Class, typename A1>
@@ -1587,26 +1587,26 @@ class Thread {
     template<typename Class, typename A1, typename A2>
     Thread(void (Class::*pFunction)(A1, A2) const, const Class* pObject, A1 a1,
            A2 a2) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, pObject, a1, a2);
     }
 
     template<typename Class, typename A1, typename A2>
     void start(void (Class::*pFunction)(A1, A2) const, const Class* pObject,
                A1 a1, A2 a2) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataMethodConst2<Class, A1, A2>* pThreadData =
             new ThreadDataMethodConst2<Class, A1, A2>(pFunction, pObject, a1,
                                                       a2);
         int result = ::pthread_create(
-            &_id, _attr, &startThreadMethodConst2<Class, A1, A2>, pThreadData);
+            &id_, attr_, &startThreadMethodConst2<Class, A1, A2>, pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -1615,17 +1615,17 @@ class Thread {
     struct ThreadDataMethodConst2 {
         ThreadDataMethodConst2(void (Class::*pFunction)(A1, A2) const,
                                const Class* pObject, A1 a1, A2 a2) :
-            _pFunction(pFunction),
-            _pObject(pObject),
-            _a1(a1),
-            _a2(a2) {}
+            pFunction_(pFunction),
+            pObject_(pObject),
+            a1_(a1),
+            a2_(a2) {}
         void call() {
-            (_pObject->*_pFunction)(_a1, _a2);
+            (pObject_->*pFunction_)(a1_, a2_);
         }
-        void (Class::*_pFunction)(A1, A2) const;
-        const Class* _pObject;
-        A1 _a1;
-        A2 _a2;
+        void (Class::*pFunction_)(A1, A2) const;
+        const Class* pObject_;
+        A1 a1_;
+        A2 a2_;
     };
 
     template<typename Class, typename A1, typename A2>
@@ -1641,27 +1641,27 @@ class Thread {
     template<typename Class, typename A1, typename A2, typename A3>
     Thread(void (Class::*pFunction)(A1, A2, A3) const, const Class* pObject,
            A1 a1, A2 a2, A3 a3) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, pObject, a1, a2, a3);
     }
 
     template<typename Class, typename A1, typename A2, typename A3>
     void start(void (Class::*pFunction)(A1, A2, A3) const, const Class* pObject,
                A1 a1, A2 a2, A3 a3) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataMethodConst3<Class, A1, A2, A3>* pThreadData =
             new ThreadDataMethodConst3<Class, A1, A2, A3>(pFunction, pObject,
                                                           a1, a2, a3);
         int result = ::pthread_create(
-            &_id, _attr, &startThreadMethodConst3<Class, A1, A2, A3>,
+            &id_, attr_, &startThreadMethodConst3<Class, A1, A2, A3>,
             pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -1670,19 +1670,19 @@ class Thread {
     struct ThreadDataMethodConst3 {
         ThreadDataMethodConst3(void (Class::*pFunction)(A1, A2, A3) const,
                                const Class* pObject, A1 a1, A2 a2, A3 a3) :
-            _pFunction(pFunction),
-            _pObject(pObject),
-            _a1(a1),
-            _a2(a2),
-            _a3(a3) {}
+            pFunction_(pFunction),
+            pObject_(pObject),
+            a1_(a1),
+            a2_(a2),
+            a3_(a3) {}
         void call() {
-            (_pObject->*_pFunction)(_a1, _a2, _a3);
+            (pObject_->*pFunction_)(a1_, a2_, a3_);
         }
-        void (Class::*_pFunction)(A1, A2, A3) const;
-        const Class* _pObject;
-        A1 _a1;
-        A2 _a2;
-        A3 _a3;
+        void (Class::*pFunction_)(A1, A2, A3) const;
+        const Class* pObject_;
+        A1 a1_;
+        A2 a2_;
+        A3 a3_;
     };
 
     template<typename Class, typename A1, typename A2, typename A3>
@@ -1698,27 +1698,27 @@ class Thread {
     template<typename Class, typename A1, typename A2, typename A3, typename A4>
     Thread(void (Class::*pFunction)(A1, A2, A3, A4) const, const Class* pObject,
            A1 a1, A2 a2, A3 a3, A4 a4) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4);
     }
 
     template<typename Class, typename A1, typename A2, typename A3, typename A4>
     void start(void (Class::*pFunction)(A1, A2, A3, A4) const,
                const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataMethodConst4<Class, A1, A2, A3, A4>* pThreadData =
             new ThreadDataMethodConst4<Class, A1, A2, A3, A4>(
                 pFunction, pObject, a1, a2, a3, a4);
         int result = ::pthread_create(
-            &_id, _attr, &startThreadMethodConst4<Class, A1, A2, A3, A4>,
+            &id_, attr_, &startThreadMethodConst4<Class, A1, A2, A3, A4>,
             pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -1728,21 +1728,21 @@ class Thread {
         ThreadDataMethodConst4(void (Class::*pFunction)(A1, A2, A3, A4) const,
                                const Class* pObject, A1 a1, A2 a2, A3 a3,
                                A4 a4) :
-            _pFunction(pFunction),
-            _pObject(pObject),
-            _a1(a1),
-            _a2(a2),
-            _a3(a3),
-            _a4(a4) {}
+            pFunction_(pFunction),
+            pObject_(pObject),
+            a1_(a1),
+            a2_(a2),
+            a3_(a3),
+            a4_(a4) {}
         void call() {
-            (_pObject->*_pFunction)(_a1, _a2, _a3, _a4);
+            (pObject_->*pFunction_)(a1_, a2_, a3_, a4_);
         }
-        void (Class::*_pFunction)(A1, A2, A3, A4) const;
-        const Class* _pObject;
-        A1 _a1;
-        A2 _a2;
-        A3 _a3;
-        A4 _a4;
+        void (Class::*pFunction_)(A1, A2, A3, A4) const;
+        const Class* pObject_;
+        A1 a1_;
+        A2 a2_;
+        A3 a3_;
+        A4 a4_;
     };
 
     template<typename Class, typename A1, typename A2, typename A3, typename A4>
@@ -1760,9 +1760,9 @@ class Thread {
              typename A5>
     Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5) const,
            const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4, a5);
     }
 
@@ -1770,18 +1770,18 @@ class Thread {
              typename A5>
     void start(void (Class::*pFunction)(A1, A2, A3, A4, A5) const,
                const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataMethodConst5<Class, A1, A2, A3, A4, A5>* pThreadData =
             new ThreadDataMethodConst5<Class, A1, A2, A3, A4, A5>(
                 pFunction, pObject, a1, a2, a3, a4, a5);
         int result = ::pthread_create(
-            &_id, _attr, &startThreadMethodConst5<Class, A1, A2, A3, A4, A5>,
+            &id_, attr_, &startThreadMethodConst5<Class, A1, A2, A3, A4, A5>,
             pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -1793,23 +1793,23 @@ class Thread {
                                    const,
                                const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
                                A5 a5) :
-            _pFunction(pFunction),
-            _pObject(pObject),
-            _a1(a1),
-            _a2(a2),
-            _a3(a3),
-            _a4(a4),
-            _a5(a5) {}
+            pFunction_(pFunction),
+            pObject_(pObject),
+            a1_(a1),
+            a2_(a2),
+            a3_(a3),
+            a4_(a4),
+            a5_(a5) {}
         void call() {
-            (_pObject->*_pFunction)(_a1, _a2, _a3, _a4, _a5);
+            (pObject_->*pFunction_)(a1_, a2_, a3_, a4_, a5_);
         }
-        void (Class::*_pFunction)(A1, A2, A3, A4, A5) const;
-        const Class* _pObject;
-        A1 _a1;
-        A2 _a2;
-        A3 _a3;
-        A4 _a4;
-        A5 _a5;
+        void (Class::*pFunction_)(A1, A2, A3, A4, A5) const;
+        const Class* pObject_;
+        A1 a1_;
+        A2 a2_;
+        A3 a3_;
+        A4 a4_;
+        A5 a5_;
     };
 
     template<typename Class, typename A1, typename A2, typename A3, typename A4,
@@ -1828,9 +1828,9 @@ class Thread {
              typename A5, typename A6>
     Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6) const,
            const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4, a5, a6);
     }
 
@@ -1838,19 +1838,19 @@ class Thread {
              typename A5, typename A6>
     void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6) const,
                const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataMethodConst6<Class, A1, A2, A3, A4, A5, A6>* pThreadData =
             new ThreadDataMethodConst6<Class, A1, A2, A3, A4, A5, A6>(
                 pFunction, pObject, a1, a2, a3, a4, a5, a6);
         int result = ::pthread_create(
-            &_id, _attr,
+            &id_, attr_,
             &startThreadMethodConst6<Class, A1, A2, A3, A4, A5, A6>,
             pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -1862,25 +1862,25 @@ class Thread {
                                    const,
                                const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
                                A5 a5, A6 a6) :
-            _pFunction(pFunction),
-            _pObject(pObject),
-            _a1(a1),
-            _a2(a2),
-            _a3(a3),
-            _a4(a4),
-            _a5(a5),
-            _a6(a6) {}
+            pFunction_(pFunction),
+            pObject_(pObject),
+            a1_(a1),
+            a2_(a2),
+            a3_(a3),
+            a4_(a4),
+            a5_(a5),
+            a6_(a6) {}
         void call() {
-            (_pObject->*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6);
+            (pObject_->*pFunction_)(a1_, a2_, a3_, a4_, a5_, a6_);
         }
-        void (Class::*_pFunction)(A1, A2, A3, A4, A5, A6) const;
-        const Class* _pObject;
-        A1 _a1;
-        A2 _a2;
-        A3 _a3;
-        A4 _a4;
-        A5 _a5;
-        A6 _a6;
+        void (Class::*pFunction_)(A1, A2, A3, A4, A5, A6) const;
+        const Class* pObject_;
+        A1 a1_;
+        A2 a2_;
+        A3 a3_;
+        A4 a4_;
+        A5 a5_;
+        A6 a6_;
     };
 
     template<typename Class, typename A1, typename A2, typename A3, typename A4,
@@ -1900,9 +1900,9 @@ class Thread {
     Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7) const,
            const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
            A7 a7) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4, a5, a6, a7);
     }
 
@@ -1911,19 +1911,19 @@ class Thread {
     void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7) const,
                const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
                A7 a7) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataMethodConst7<Class, A1, A2, A3, A4, A5, A6, A7>* pThreadData =
             new ThreadDataMethodConst7<Class, A1, A2, A3, A4, A5, A6, A7>(
                 pFunction, pObject, a1, a2, a3, a4, a5, a6, a7);
         int result = ::pthread_create(
-            &_id, _attr,
+            &id_, attr_,
             &startThreadMethodConst7<Class, A1, A2, A3, A4, A5, A6, A7>,
             pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -1935,27 +1935,27 @@ class Thread {
                                                         A7) const,
                                const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
                                A5 a5, A6 a6, A7 a7) :
-            _pFunction(pFunction),
-            _pObject(pObject),
-            _a1(a1),
-            _a2(a2),
-            _a3(a3),
-            _a4(a4),
-            _a5(a5),
-            _a6(a6),
-            _a7(a7) {}
+            pFunction_(pFunction),
+            pObject_(pObject),
+            a1_(a1),
+            a2_(a2),
+            a3_(a3),
+            a4_(a4),
+            a5_(a5),
+            a6_(a6),
+            a7_(a7) {}
         void call() {
-            (_pObject->*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6, _a7);
+            (pObject_->*pFunction_)(a1_, a2_, a3_, a4_, a5_, a6_, a7_);
         }
-        void (Class::*_pFunction)(A1, A2, A3, A4, A5, A6, A7) const;
-        const Class* _pObject;
-        A1 _a1;
-        A2 _a2;
-        A3 _a3;
-        A4 _a4;
-        A5 _a5;
-        A6 _a6;
-        A7 _a7;
+        void (Class::*pFunction_)(A1, A2, A3, A4, A5, A6, A7) const;
+        const Class* pObject_;
+        A1 a1_;
+        A2 a2_;
+        A3 a3_;
+        A4 a4_;
+        A5 a5_;
+        A6 a6_;
+        A7 a7_;
     };
 
     template<typename Class, typename A1, typename A2, typename A3, typename A4,
@@ -1976,9 +1976,9 @@ class Thread {
     Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8) const,
            const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
            A7 a7, A8 a8) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8);
     }
 
@@ -1987,20 +1987,20 @@ class Thread {
     void start(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8) const,
                const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
                A7 a7, A8 a8) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataMethodConst8<Class, A1, A2, A3, A4, A5, A6, A7,
                                A8>* pThreadData =
             new ThreadDataMethodConst8<Class, A1, A2, A3, A4, A5, A6, A7, A8>(
                 pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8);
         int result = ::pthread_create(
-            &_id, _attr,
+            &id_, attr_,
             &startThreadMethodConst8<Class, A1, A2, A3, A4, A5, A6, A7, A8>,
             pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -2012,29 +2012,29 @@ class Thread {
                                                         A7, A8) const,
                                const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
                                A5 a5, A6 a6, A7 a7, A8 a8) :
-            _pFunction(pFunction),
-            _pObject(pObject),
-            _a1(a1),
-            _a2(a2),
-            _a3(a3),
-            _a4(a4),
-            _a5(a5),
-            _a6(a6),
-            _a7(a7),
-            _a8(a8) {}
+            pFunction_(pFunction),
+            pObject_(pObject),
+            a1_(a1),
+            a2_(a2),
+            a3_(a3),
+            a4_(a4),
+            a5_(a5),
+            a6_(a6),
+            a7_(a7),
+            a8_(a8) {}
         void call() {
-            (_pObject->*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6, _a7, _a8);
+            (pObject_->*pFunction_)(a1_, a2_, a3_, a4_, a5_, a6_, a7_, a8_);
         }
-        void (Class::*_pFunction)(A1, A2, A3, A4, A5, A6, A7, A8) const;
-        const Class* _pObject;
-        A1 _a1;
-        A2 _a2;
-        A3 _a3;
-        A4 _a4;
-        A5 _a5;
-        A6 _a6;
-        A7 _a7;
-        A8 _a8;
+        void (Class::*pFunction_)(A1, A2, A3, A4, A5, A6, A7, A8) const;
+        const Class* pObject_;
+        A1 a1_;
+        A2 a2_;
+        A3 a3_;
+        A4 a4_;
+        A5 a5_;
+        A6 a6_;
+        A7 a7_;
+        A8 a8_;
     };
 
     template<typename Class, typename A1, typename A2, typename A3, typename A4,
@@ -2055,9 +2055,9 @@ class Thread {
     Thread(void (Class::*pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9) const,
            const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
            A7 a7, A8 a8, A9 a9) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8, a9);
     }
 
@@ -2067,20 +2067,20 @@ class Thread {
                    const,
                const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
                A7 a7, A8 a8, A9 a9) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataMethodConst9<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9>*
             pThreadData = new ThreadDataMethodConst9<Class, A1, A2, A3, A4, A5,
                                                      A6, A7, A8, A9>(
                 pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8, a9);
         int result = ::pthread_create(
-            &_id, _attr,
+            &id_, attr_,
             &startThreadMethodConst9<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9>,
             pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -2092,32 +2092,32 @@ class Thread {
                                                         A7, A8, A9) const,
                                const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4,
                                A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) :
-            _pFunction(pFunction),
-            _pObject(pObject),
-            _a1(a1),
-            _a2(a2),
-            _a3(a3),
-            _a4(a4),
-            _a5(a5),
-            _a6(a6),
-            _a7(a7),
-            _a8(a8),
-            _a9(a9) {}
+            pFunction_(pFunction),
+            pObject_(pObject),
+            a1_(a1),
+            a2_(a2),
+            a3_(a3),
+            a4_(a4),
+            a5_(a5),
+            a6_(a6),
+            a7_(a7),
+            a8_(a8),
+            a9_(a9) {}
         void call() {
-            (_pObject->*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6, _a7, _a8,
-                                    _a9);
+            (pObject_->*pFunction_)(a1_, a2_, a3_, a4_, a5_, a6_, a7_, a8_,
+                                    a9_);
         }
-        void (Class::*_pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9) const;
-        const Class* _pObject;
-        A1 _a1;
-        A2 _a2;
-        A3 _a3;
-        A4 _a4;
-        A5 _a5;
-        A6 _a6;
-        A7 _a7;
-        A8 _a8;
-        A9 _a9;
+        void (Class::*pFunction_)(A1, A2, A3, A4, A5, A6, A7, A8, A9) const;
+        const Class* pObject_;
+        A1 a1_;
+        A2 a2_;
+        A3 a3_;
+        A4 a4_;
+        A5 a5_;
+        A6 a6_;
+        A7 a7_;
+        A8 a8_;
+        A9 a9_;
     };
 
     template<typename Class, typename A1, typename A2, typename A3, typename A4,
@@ -2140,9 +2140,9 @@ class Thread {
                const,
            const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
            A7 a7, A8 a8, A9 a9, A10 a10) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
     }
 
@@ -2153,21 +2153,21 @@ class Thread {
                    const,
                const Class* pObject, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
                A7 a7, A8 a8, A9 a9, A10 a10) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadDataMethodConst10<Class, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>*
             pThreadData = new ThreadDataMethodConst10<Class, A1, A2, A3, A4, A5,
                                                       A6, A7, A8, A9, A10>(
                 pFunction, pObject, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
         int result =
-            ::pthread_create(&_id, _attr,
+            ::pthread_create(&id_, attr_,
                              &startThreadMethodConst10<Class, A1, A2, A3, A4,
                                                        A5, A6, A7, A8, A9, A10>,
                              pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -2181,35 +2181,35 @@ class Thread {
                                 const Class* pObject, A1 a1, A2 a2, A3 a3,
                                 A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9,
                                 A10 a10) :
-            _pFunction(pFunction),
-            _pObject(pObject),
-            _a1(a1),
-            _a2(a2),
-            _a3(a3),
-            _a4(a4),
-            _a5(a5),
-            _a6(a6),
-            _a7(a7),
-            _a8(a8),
-            _a9(a9),
-            _a10(a10) {}
+            pFunction_(pFunction),
+            pObject_(pObject),
+            a1_(a1),
+            a2_(a2),
+            a3_(a3),
+            a4_(a4),
+            a5_(a5),
+            a6_(a6),
+            a7_(a7),
+            a8_(a8),
+            a9_(a9),
+            a10_(a10) {}
         void call() {
-            (_pObject->*_pFunction)(_a1, _a2, _a3, _a4, _a5, _a6, _a7, _a8, _a9,
-                                    _a10);
+            (pObject_->*pFunction_)(a1_, a2_, a3_, a4_, a5_, a6_, a7_, a8_, a9_,
+                                    a10_);
         }
-        void (Class::*_pFunction)(A1, A2, A3, A4, A5, A6, A7, A8, A9,
+        void (Class::*pFunction_)(A1, A2, A3, A4, A5, A6, A7, A8, A9,
                                   A10) const;
-        const Class* _pObject;
-        A1 _a1;
-        A2 _a2;
-        A3 _a3;
-        A4 _a4;
-        A5 _a5;
-        A6 _a6;
-        A7 _a7;
-        A8 _a8;
-        A9 _a9;
-        A10 _a10;
+        const Class* pObject_;
+        A1 a1_;
+        A2 a2_;
+        A3 a3_;
+        A4 a4_;
+        A5 a5_;
+        A6 a6_;
+        A7 a7_;
+        A8 a8_;
+        A9 a9_;
+        A10 a10_;
     };
 
     template<typename Class, typename A1, typename A2, typename A3, typename A4,

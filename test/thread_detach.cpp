@@ -66,8 +66,7 @@ std::vector<int> MyTest::resultStaticMethodArgs = std::vector<int>();
 std::vector<int> MyTest::resultMethodArgsConst = std::vector<int>();
 
 // create new function and singleton instance for mock
-MOCKC_METHOD1(pthread_detach,
-              int(pthread_t __newthread))
+MOCKC_METHOD1(pthread_detach, int(pthread_t __newthread))
 
 GTEST_TEST(thread, staticMethodVoid) {
     MyTest::resultStaticMethodVoid = false;

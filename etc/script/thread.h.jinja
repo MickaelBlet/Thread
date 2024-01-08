@@ -33,86 +33,86 @@ namespace blet {
 
 class Thread {
   private:
-    ::pthread_t _id;
-    bool _isDetached;
-    ::pthread_attr_t* _attr;
+    ::pthread_t id_;
+    bool isDetached_;
+    ::pthread_attr_t* attr_;
 
   public:
     class Exception : public std::exception {
       public:
         Exception(const pthread_t& id, const char* message) :
             std::exception(),
-            _what(message),
-            _id(id) {
+            what_(message),
+            id_(id) {
         }
         virtual ~Exception() throw() {
         }
         const char* what() const throw() {
-            return _what;
+            return what_;
         }
 
       protected:
-        const char* _what;
-        ::pthread_t _id;
+        const char* what_;
+        ::pthread_t id_;
     };
 
     Thread() :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
     }
 
     virtual ~Thread() {
-        if (_id != 0 && !_isDetached) {
-            ::pthread_join(_id, NULL);
+        if (id_ != 0 && !isDetached_) {
+            ::pthread_join(id_, NULL);
         }
     }
 
     void join() {
-        if (_id == 0 || _isDetached) {
-            throw Exception(_id, "Thread is not joinable");
+        if (id_ == 0 || isDetached_) {
+            throw Exception(id_, "Thread is not joinable");
         }
-        ::pthread_join(_id, NULL);
-        _id = 0;
+        ::pthread_join(id_, NULL);
+        id_ = 0;
     }
 
     bool joinable() const {
-        return _id != 0 && !_isDetached;
+        return id_ != 0 && !isDetached_;
     }
 
     void cancel() {
-        if (_id == 0 || _isDetached) {
-            throw Exception(_id, "Thread is not cancelable");
+        if (id_ == 0 || isDetached_) {
+            throw Exception(id_, "Thread is not cancelable");
         }
 
-        int result = ::pthread_cancel(_id);
+        int result = ::pthread_cancel(id_);
         if (result != 0) {
-            throw Exception(_id, "Failed to cancel thread");
+            throw Exception(id_, "Failed to cancel thread");
         }
     }
 
     void detach() {
-        if (_id == 0 || _isDetached) {
-            throw Exception(_id, "Thread is not detachable");
+        if (id_ == 0 || isDetached_) {
+            throw Exception(id_, "Thread is not detachable");
         }
 
-        int result = ::pthread_detach(_id);
+        int result = ::pthread_detach(id_);
         if (result != 0) {
-            throw Exception(_id, "Failed to detach thread");
+            throw Exception(id_, "Failed to detach thread");
         }
-        _isDetached = true;
+        isDetached_ = true;
     }
 
     const pthread_t& get_id() const {
-        return _id;
+        return id_;
     }
 
     const pthread_t& native_handle() const {
-        return _id;
+        return id_;
     }
 
     void set_attr(pthread_attr_t* attr) {
-        _attr = attr;
+        attr_ = attr;
     }
 
     // -------------------------------------------------------------------------
@@ -127,9 +127,9 @@ class Thread {
     template<{% if type == 'Method' or type == 'MethodConst' %}typename Class{% if i > 1 %}, {% endif %}{% endif %}{% for i in range(1, i) %}{% if i > 1 %}, {% endif %}typename A{{i}}{% endfor %}>
 {% endif %}
     Thread(void ({% if type == 'Method' or type == 'MethodConst' %}Class::{% endif %}*pFunction)({% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}}{% endfor %}){% if type == 'MethodConst' %} const{% endif %}{% if i > 1 or type == 'Method' or type == 'MethodConst' %}, {% endif %}{% if type == 'Method' or type == 'MethodConst' %}{% if type == 'MethodConst' %}const {% endif %}Class* pObject{% if i > 1 %}, {% endif %}{% endif %}{% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}} a{{i}}{% endfor %}) :
-        _id(0),
-        _isDetached(false),
-        _attr(NULL) {
+        id_(0),
+        isDetached_(false),
+        attr_(NULL) {
         start(pFunction{% if i > 1 or type == 'Method' or type == 'MethodConst' %}, {% endif %}{% if type == 'Method' or type == 'MethodConst' %}pObject{% if i > 1 %}, {% endif %}{% endif %}{% for i in range(1, i) %}{% if i > 1 %}, {% endif %}a{{i}}{% endfor %});
     }
 
@@ -137,8 +137,8 @@ class Thread {
     template<{% if type == 'Method' or type == 'MethodConst' %}typename Class{% if i > 1 %}, {% endif %}{% endif %}{% for i in range(1, i) %}{% if i > 1 %}, {% endif %}typename A{{i}}{% endfor %}>
 {% endif %}
     void start(void ({% if type == 'Method' or type == 'MethodConst' %}Class::{% endif %}*pFunction)({% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}}{% endfor %}){% if type == 'MethodConst' %} const{% endif %}{% if i > 1 or type == 'Method' or type == 'MethodConst' %}, {% endif %}{% if type == 'Method' or type == 'MethodConst' %}{% if type == 'MethodConst' %}const {% endif %}Class* pObject{% if i > 1 %}, {% endif %}{% endif %}{% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}} a{{i}}{% endfor %}) {
-        if (_id != 0) {
-            throw Exception(_id, "Thread already started");
+        if (id_ != 0) {
+            throw Exception(id_, "Thread already started");
         }
         ThreadData{{type}}{{i - 1}}
 {%- if i > 1 or type == 'Method' or type == 'MethodConst' -%}
@@ -149,14 +149,14 @@ class Thread {
         <{% if type == 'Method' or type == 'MethodConst' %}Class{% if i > 1 %}, {% endif %}{% endif %}{% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}}{% endfor %}>
 {%- endif -%}
         (pFunction{% if i > 1 or type == 'Method' or type == 'MethodConst' %}, {% endif %}{% if type == 'Method' or type == 'MethodConst' %}pObject{% if i > 1 %}, {% endif %}{% endif %}{% for i in range(1, i) %}{% if i > 1 %}, {% endif %}a{{i}}{% endfor %});
-        int result = ::pthread_create(&_id, _attr, &startThread{{type}}{{i - 1}}
+        int result = ::pthread_create(&id_, attr_, &startThread{{type}}{{i - 1}}
 {%- if i > 1 or type == 'Method' or type == 'MethodConst' -%}
     <{% if type == 'Method' or type == 'MethodConst' %}Class{% if i > 1 %}, {% endif %}{% endif %}{% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}}{% endfor %}>
 {%- endif -%}
         , pThreadData);
         if (result != 0) {
             delete pThreadData;
-            throw Exception(_id, "Failed to create thread");
+            throw Exception(id_, "Failed to create thread");
         }
     }
 
@@ -166,18 +166,18 @@ class Thread {
 {% endif %}
     struct ThreadData{{type}}{{i - 1}} {
         ThreadData{{type}}{{i - 1}}(void ({% if type == 'Method' or type == 'MethodConst' %}Class::{% endif %}*pFunction)({% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}}{% endfor %}){% if type == 'MethodConst' %} const{% endif %}{% if i > 1 or type == 'Method' or type == 'MethodConst' %}, {% endif %}{% if type == 'Method' or type == 'MethodConst' %}{% if type == 'MethodConst' %}const {% endif %}Class* pObject{% if i > 1 %}, {% endif %}{% endif %}{% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}} a{{i}}{% endfor %}) :
-            _pFunction(pFunction)
+            pFunction_(pFunction)
             {%- if i > 1 or type == 'Method' or type == 'MethodConst' %}, {% endif %}
-            {%- if type == 'Method' or type == 'MethodConst' %}_pObject(pObject){% if i > 1 %}, {% endif %}{% endif %}{% for i in range(1, i) %}{% if i > 1 %}, {% endif %}_a{{i}}(a{{i}}){% endfor %}
+            {%- if type == 'Method' or type == 'MethodConst' %}pObject_(pObject){% if i > 1 %}, {% endif %}{% endif %}{% for i in range(1, i) %}{% if i > 1 %}, {% endif %}a{{i}}_(a{{i}}){% endfor %}
  {}
         void call() {
-            ({% if type == 'Method' or type == 'MethodConst' %}_pObject->{% endif %}*_pFunction)({% for i in range(1, i) %}{% if i > 1 %}, {% endif %}_a{{i}}{% endfor %});
+            ({% if type == 'Method' or type == 'MethodConst' %}pObject_->{% endif %}*pFunction_)({% for i in range(1, i) %}{% if i > 1 %}, {% endif %}a{{i}}_{% endfor %});
         }
-        void ({% if type == 'Method' or type == 'MethodConst' %}Class::{% endif %}*_pFunction)({% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}}{% endfor %}){% if type == 'MethodConst' %} const{% endif %};
-{% if type == 'Method' or type == 'MethodConst' %}        {% if type == 'MethodConst' %}const {% endif %}Class* _pObject;
+        void ({% if type == 'Method' or type == 'MethodConst' %}Class::{% endif %}*pFunction_)({% for i in range(1, i) %}{% if i > 1 %}, {% endif %}A{{i}}{% endfor %}){% if type == 'MethodConst' %} const{% endif %};
+{% if type == 'Method' or type == 'MethodConst' %}        {% if type == 'MethodConst' %}const {% endif %}Class* pObject_;
 {% endif %}
 {% for i in range(1, i) %}
-        A{{i}} _a{{i}};
+        A{{i}} a{{i}}_;
 {% endfor %}
     };
 
