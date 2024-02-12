@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include <iostream>
 #include <vector>
 
 #include "blet/mockc.h"
@@ -66,9 +65,10 @@ std::vector<int> MyTest::resultStaticMethodArgs = std::vector<int>();
 std::vector<int> MyTest::resultMethodArgsConst = std::vector<int>();
 
 // create new function and singleton instance for mock
-MOCKC_METHOD1(pthread_detach, int(pthread_t __newthread))
+MOCKC_METHOD1(int, pthread_detach, (pthread_t __newthread));
 
 GTEST_TEST(thread, staticMethodVoid) {
+    MOCKC_NEW_INSTANCE(pthread_detach);
     MyTest::resultStaticMethodVoid = false;
 
     EXPECT_CALL(MOCKC_INSTANCE(pthread_detach), pthread_detach(_))
@@ -77,6 +77,7 @@ GTEST_TEST(thread, staticMethodVoid) {
 
     EXPECT_THROW(
         {
+            MOCKC_GUARD(pthread_detach);
             try {
                 blet::Thread thrd;
                 thrd.detach();
@@ -90,6 +91,7 @@ GTEST_TEST(thread, staticMethodVoid) {
 
     EXPECT_THROW(
         {
+            MOCKC_GUARD(pthread_detach);
             try {
                 blet::Thread thrd;
                 thrd.start(&MyTest::staticMethodVoid);
@@ -103,6 +105,7 @@ GTEST_TEST(thread, staticMethodVoid) {
         blet::Thread::Exception);
 
     {
+        MOCKC_GUARD(pthread_detach);
         blet::Thread thrd;
         thrd.start(&MyTest::staticMethodVoid);
         thrd.detach();

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <iostream>
 #include <vector>
+#include <pthread.h>
 
 #include "blet/mockc.h"
 #include "blet/thread.h"
@@ -66,9 +66,11 @@ std::vector<int> MyTest::resultStaticMethodArgs = std::vector<int>();
 std::vector<int> MyTest::resultMethodArgsConst = std::vector<int>();
 
 // create new function and singleton instance for mock
-MOCKC_METHOD1(pthread_cancel, int(pthread_t __newthread))
+MOCKC_METHOD1(int, pthread_cancel, (pthread_t __newthread));
 
 GTEST_TEST(thread, staticMethodVoid) {
+    MOCKC_NEW_INSTANCE(pthread_cancel);
+
     MyTest::resultStaticMethodVoid = false;
 
     EXPECT_CALL(MOCKC_INSTANCE(pthread_cancel), pthread_cancel(_))
@@ -77,6 +79,7 @@ GTEST_TEST(thread, staticMethodVoid) {
 
     EXPECT_THROW(
         {
+            MOCKC_GUARD(pthread_cancel);
             try {
                 blet::Thread thrd;
                 thrd.cancel();
@@ -90,6 +93,7 @@ GTEST_TEST(thread, staticMethodVoid) {
 
     EXPECT_THROW(
         {
+            MOCKC_GUARD(pthread_cancel);
             try {
                 blet::Thread thrd;
                 thrd.start(&MyTest::staticMethodVoid);
@@ -103,6 +107,7 @@ GTEST_TEST(thread, staticMethodVoid) {
         blet::Thread::Exception);
 
     {
+        MOCKC_GUARD(pthread_cancel);
         blet::Thread thrd;
         thrd.start(&MyTest::staticMethodVoid);
         thrd.cancel();

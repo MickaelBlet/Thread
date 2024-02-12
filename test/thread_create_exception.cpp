@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include <iostream>
 #include <vector>
 
 #include "blet/mockc.h"
@@ -66,11 +65,12 @@ std::vector<int> MyTest::resultStaticMethodArgs = std::vector<int>();
 std::vector<int> MyTest::resultMethodArgsConst = std::vector<int>();
 
 // create new function and singleton instance for mock
-MOCKC_METHOD4(pthread_create,
-              int(pthread_t* __newthread, const pthread_attr_t* __attr,
-                  void* (*__start_routine)(void*), void* __arg))
+MOCKC_METHOD4(int, pthread_create,
+              (pthread_t* __newthread, const pthread_attr_t* __attr,
+                  void* (*__start_routine)(void*), void* __arg));
 
 GTEST_TEST(thread, staticMethodVoid) {
+    MOCKC_NEW_INSTANCE(pthread_create);
     MyTest::resultStaticMethodVoid = false;
 
     EXPECT_CALL(MOCKC_INSTANCE(pthread_create), pthread_create(_, _, _, _))
@@ -78,6 +78,7 @@ GTEST_TEST(thread, staticMethodVoid) {
 
     EXPECT_THROW(
         {
+            MOCKC_GUARD(pthread_create);
             try {
                 blet::Thread thrd;
                 thrd.start(&MyTest::staticMethodVoid);
@@ -91,6 +92,7 @@ GTEST_TEST(thread, staticMethodVoid) {
 }
 
 GTEST_TEST(thread, staticMethodArg1) {
+    MOCKC_NEW_INSTANCE(pthread_create);
     MyTest::resultStaticMethodVoid = false;
 
     EXPECT_CALL(MOCKC_INSTANCE(pthread_create), pthread_create(_, _, _, _))
@@ -98,6 +100,7 @@ GTEST_TEST(thread, staticMethodArg1) {
 
     EXPECT_THROW(
         {
+            MOCKC_GUARD(pthread_create);
             try {
                 int v = 42;
                 blet::Thread thrd;
@@ -112,6 +115,7 @@ GTEST_TEST(thread, staticMethodArg1) {
 }
 
 GTEST_TEST(thread, staticMethodArg2) {
+    MOCKC_NEW_INSTANCE(pthread_create);
     MyTest::resultStaticMethodVoid = false;
 
     EXPECT_CALL(MOCKC_INSTANCE(pthread_create), pthread_create(_, _, _, _))
@@ -119,6 +123,7 @@ GTEST_TEST(thread, staticMethodArg2) {
 
     EXPECT_THROW(
         {
+            MOCKC_GUARD(pthread_create);
             try {
                 blet::Thread thrd;
                 thrd.start(&MyTest::staticMethodArg2, 1, 2);
@@ -132,11 +137,14 @@ GTEST_TEST(thread, staticMethodArg2) {
 }
 
 GTEST_TEST(thread, methodVoid) {
+    MOCKC_NEW_INSTANCE(pthread_create);
+
     EXPECT_CALL(MOCKC_INSTANCE(pthread_create), pthread_create(_, _, _, _))
         .WillOnce(Return(-1));
 
     EXPECT_THROW(
         {
+            MOCKC_GUARD(pthread_create);
             try {
                 MyTest t;
                 blet::Thread thrd;
@@ -158,11 +166,14 @@ static void launchThread() {
 }
 
 GTEST_TEST(thread, methodArg1) {
+    MOCKC_NEW_INSTANCE(pthread_create);
+
     EXPECT_CALL(MOCKC_INSTANCE(pthread_create), pthread_create(_, _, _, _))
         .WillOnce(Return(-1));
 
     EXPECT_THROW(
         {
+            MOCKC_GUARD(pthread_create);
             try {
                 launchThread();
             }
@@ -175,11 +186,14 @@ GTEST_TEST(thread, methodArg1) {
 }
 
 GTEST_TEST(thread, methodArg2) {
+    MOCKC_NEW_INSTANCE(pthread_create);
+
     EXPECT_CALL(MOCKC_INSTANCE(pthread_create), pthread_create(_, _, _, _))
         .WillOnce(Return(-1));
 
     EXPECT_THROW(
         {
+            MOCKC_GUARD(pthread_create);
             try {
                 MyTest t;
                 blet::Thread thrd;
@@ -194,11 +208,14 @@ GTEST_TEST(thread, methodArg2) {
 }
 
 GTEST_TEST(thread, methodVoidConst) {
+    MOCKC_NEW_INSTANCE(pthread_create);
+
     EXPECT_CALL(MOCKC_INSTANCE(pthread_create), pthread_create(_, _, _, _))
         .WillOnce(Return(-1));
 
     EXPECT_THROW(
         {
+            MOCKC_GUARD(pthread_create);
             try {
                 MyTest t;
                 blet::Thread thrd;
@@ -213,11 +230,14 @@ GTEST_TEST(thread, methodVoidConst) {
 }
 
 GTEST_TEST(thread, methodArg1Const) {
+    MOCKC_NEW_INSTANCE(pthread_create);
+
     EXPECT_CALL(MOCKC_INSTANCE(pthread_create), pthread_create(_, _, _, _))
         .WillOnce(Return(-1));
 
     EXPECT_THROW(
         {
+            MOCKC_GUARD(pthread_create);
             try {
                 MyTest t;
                 blet::Thread thrd;
@@ -232,11 +252,14 @@ GTEST_TEST(thread, methodArg1Const) {
 }
 
 GTEST_TEST(thread, methodArg2Const) {
+    MOCKC_NEW_INSTANCE(pthread_create);
+
     EXPECT_CALL(MOCKC_INSTANCE(pthread_create), pthread_create(_, _, _, _))
         .WillOnce(Return(-1));
 
     EXPECT_THROW(
         {
+            MOCKC_GUARD(pthread_create);
             try {
                 MyTest t;
                 blet::Thread thrd;

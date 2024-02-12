@@ -24,7 +24,7 @@ foreach(file ${test_source_files})
         NO_SYSTEM_FROM_IMPORTED ON
         COMPILE_FLAGS "-std=c++98 -pedantic -Wall -Wextra -Werror"
         INCLUDE_DIRECTORIES "${library_include_dirs};${CMAKE_CURRENT_SOURCE_DIR}/include"
-        LINK_LIBRARIES "gmock_main;gmock;pthread;${library_project_name}"
+        LINK_LIBRARIES "gmock_main;gmock;gtest;pthread;${library_project_name};dl"
     )
     add_test(NAME "${filenamewe}.${library_project_name}.gtest" COMMAND "$<TARGET_FILE:${filenamewe}.${library_project_name}.gtest>")
     if(BUILD_COVERAGE)
